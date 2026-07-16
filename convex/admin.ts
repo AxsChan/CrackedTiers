@@ -1,6 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
+// Helper to check if user is admin
 async function requireAdmin(ctx: any, token: string) {
   const user = await ctx.db.query("testers").withIndex("by_session", (q: any) => q.eq("session_token", token)).first();
   if (!user) throw new Error("Unauthorized: Not logged in.");
@@ -15,7 +16,13 @@ export const searchTesters = query({
   handler: async (ctx, args) => {
     if (!args.term) return [];
     const testers = await ctx.db.query("testers").collect();
-    return testers.filter(t => (t.mc_name || "").toLowerCase().includes(args.term.toLowerCase()) || (t.username || "").toLowerCase().includes(args.term.toLowerCase())).slice(0, 10).map(t => ({ mc_name: t.mc_name, username: t.username }));
+    return testers
+      .filter(t => 
+        (t.mc_name || "").toLowerCase().includes(args.term.toLowerCase()) || 
+        (t.username || "").toLowerCase().includes(args.term.toLowerCase())
+      )
+      .slice(0, 10)
+      .map(t => ({ mc_name: t.mc_name, username: t.username }));
   }
 });
 
@@ -39,24 +46,51 @@ export const getAltsByIp = query({
     const target = await ctx.db.get(args.userId);
     if (!target) return [];
     const testers = await ctx.db.query("testers").collect();
-    return testers.filter(t => t._id !== args.userId && (t.sign_up_ip === target.sign_up_ip || t.last_sign_in_ip === target.last_sign_in_ip)).map(t => t.mc_name || t.username);
+    return testers
+      .filter(t => t._id !== args.userId && (t.sign_up_ip === target.sign_up_ip || t.last_sign_in_ip === target.last_sign_in_ip))
+      .map(t => t.mc_name || t.username);
   }
 });
 
 export const savePlayer = mutation({
-  args: { token: v.string(), currentName: v.string(), newMcName: v.string(), region: v.string(), bio: v.string(), tiers: v.any() },
+  args: { 
+    token: v.string(), currentName: v.string(), newMcName: v.string(), 
+    region: v.string(), bio: v.string(), tiers: v.any() 
+  },
   handler: async (ctx, args) => {
-    await requireAdmin(ctx, args.token);
+    // 1. Find the user making the request
+    const user = await ctx.db.query("testers").withIndex("by_session", (q: any) => q.eq("session_token", args.token)).first();
+    if (!user) throw new Error("Unauthorized: Not logged in.");
+    
+    // 2. Ensure the user is at least an approved tester
+    const isTester = user.status === 'approved' && (user.role === 'tester' || ['admin', 'owner', 'superadmin'].includes(user.role || ''));
+    if (!isTester) throw new Error("Unauthorized: Tester access required.");
+    
+    // 3. Only Admins+ can update the profile/bio/name
+    const isAdmin = ['admin', 'owner', 'superadmin'].includes(user.role || '');
     const tester = await ctx.db.query("testers").withIndex("by_mc_name", q => q.eq("mc_name", args.currentName)).first();
-    if (tester) {
+    
+    if (tester && isAdmin) {
       await ctx.db.patch(tester._id, { mc_name: args.newMcName, username: args.newMcName, region: args.region, bio: args.bio });
     }
+    
+    // 4. Both Testers and Admins can update the Tiers
     const existingPlayers = await ctx.db.query("players").filter(q => q.eq(q.field("name"), args.currentName)).collect();
-    for (const p of existingPlayers) { await ctx.db.delete(p._id); }
-    const isTester = tester?.status === "approved";
+    for (const p of existingPlayers) {
+      await ctx.db.delete(p._id);
+    }
+    
+    const isPlayerTester = tester?.status === "approved";
     for (const tier of args.tiers) {
       if (tier.tier) {
-        await ctx.db.insert("players", { name: args.newMcName, category: tier.category, tier: tier.tier, region: args.region, tester: isTester, updated_at: Date.now() });
+        await ctx.db.insert("players", {
+          name: args.newMcName, 
+          category: tier.category, 
+          tier: tier.tier,
+          region: tester?.region || args.region, 
+          tester: isPlayerTester, 
+          updated_at: Date.now()
+        });
       }
     }
     return true;
@@ -79,7 +113,11 @@ export const suspend = mutation({
     const target = await ctx.db.get(args.userId);
     if (!target) throw new Error("User not found");
     if (target.role === 'superadmin' && admin.role !== 'superadmin') throw new Error("Cannot suspend superadmin");
-    await ctx.db.patch(args.userId, { status: "suspended", suspended_until: Date.now() + args.durationMs, admin_message: args.reason, suspend_reason: args.reason });
+    
+    await ctx.db.patch(args.userId, {
+      status: "suspended", suspended_until: Date.now() + args.durationMs,
+      admin_message: args.reason, suspend_reason: args.reason
+    });
     return true;
   }
 });
@@ -90,8 +128,11 @@ export const unsuspend = mutation({
     const admin = await requireAdmin(ctx, args.token);
     const target = await ctx.db.get(args.userId);
     if (!target) throw new Error("User not found");
+    
     const restoreStatus = (target.role === 'admin' || target.role === 'owner' || target.role === 'superadmin' || target.app_answers) ? 'approved' : 'registered';
-    await ctx.db.patch(args.userId, { status: restoreStatus, suspended_until: undefined, admin_message: undefined, suspend_reason: undefined });
+    await ctx.db.patch(args.userId, {
+      status: restoreStatus, suspended_until: undefined, admin_message: undefined, suspend_reason: undefined
+    });
     return true;
   }
 });
@@ -101,7 +142,9 @@ export const banIp = mutation({
   handler: async (ctx, args) => {
     await requireAdmin(ctx, args.token);
     const existing = await ctx.db.query("banned_ips").withIndex("by_ip", q => q.eq("ip_address", args.ip)).first();
-    if (!existing) { await ctx.db.insert("banned_ips", { ip_address: args.ip, banned_at: Date.now(), banned_by: args.banned_by }); }
+    if (!existing) {
+      await ctx.db.insert("banned_ips", { ip_address: args.ip, banned_at: Date.now(), banned_by: args.banned_by });
+    }
     return true;
   }
 });
@@ -111,7 +154,9 @@ export const unbanIp = mutation({
   handler: async (ctx, args) => {
     await requireAdmin(ctx, args.token);
     const existing = await ctx.db.query("banned_ips").withIndex("by_ip", q => q.eq("ip_address", args.ip)).first();
-    if (existing) { await ctx.db.delete(existing._id); }
+    if (existing) {
+      await ctx.db.delete(existing._id);
+    }
     return true;
   }
 });
@@ -123,8 +168,11 @@ export const deleteAccount = mutation({
     const target = await ctx.db.get(args.userId);
     if (!target) throw new Error("User not found");
     if (target.role === 'superadmin' && admin.role !== 'superadmin') throw new Error("Cannot delete superadmin");
+    
     const players = await ctx.db.query("players").filter(q => q.eq(q.field("name"), target.mc_name)).collect();
-    for (const p of players) { await ctx.db.delete(p._id); }
+    for (const p of players) {
+      await ctx.db.delete(p._id);
+    }
     await ctx.db.delete(args.userId);
     return true;
   }
@@ -165,7 +213,9 @@ export const rejectAllApps = mutation({
   handler: async (ctx, args) => {
     await requireAdmin(ctx, args.token);
     const pending = await ctx.db.query("testers").filter(q => q.eq(q.field("status"), "pending")).collect();
-    for (const p of pending) { await ctx.db.patch(p._id, { status: "rejected", app_answers: undefined, admin_message: args.reason }); }
+    for (const p of pending) {
+      await ctx.db.patch(p._id, { status: "rejected", app_answers: undefined, admin_message: args.reason });
+    }
     return pending.length;
   }
 });
@@ -199,6 +249,7 @@ export const updateRole = mutation({
     if (!target) throw new Error("User not found");
     if (target.role === 'superadmin' && admin.role !== 'superadmin') throw new Error("Cannot edit superadmin");
     if (args.role === 'superadmin' && admin.role !== 'superadmin') throw new Error("Only superadmins can assign superadmin");
+    
     await ctx.db.patch(args.userId, { role: args.role });
     return true;
   }
@@ -211,9 +262,13 @@ export const removeTester = mutation({
     const target = await ctx.db.get(args.userId);
     if (!target) throw new Error("User not found");
     if (target.role === 'superadmin' && admin.role !== 'superadmin') throw new Error("Cannot demote superadmin");
+    
     await ctx.db.patch(args.userId, { status: "registered", role: "tester", app_answers: undefined });
+    
     const players = await ctx.db.query("players").filter(q => q.eq(q.field("name"), target.mc_name)).collect();
-    for (const p of players) { await ctx.db.patch(p._id, { tester: false }); }
+    for (const p of players) {
+      await ctx.db.patch(p._id, { tester: false });
+    }
     return true;
   }
 });

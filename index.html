@@ -9,6 +9,10 @@
   <link rel="shortcut icon" type="image/png" href="/icon/website.png"/>
   <link rel="apple-touch-icon" href="/icon/website.png"/>
 
+  <!-- OPTIMIZATION: Preconnect to Convex to establish network connection early -->
+  <link rel="preconnect" href="https://canny-bird-190.convex.cloud">
+  <link rel="dns-prefetch" href="https://canny-bird-190.convex.cloud">
+
   <meta property="og:type" content="website"/> 
   <meta property="og:title" content="CDTiers | Rankings"/> 
   <meta property="og:description" content="View the global rankings for cracked Minecraft PvP players. Compete across 7 gamemodes, earn tiers, and climb the leaderboard."/> 
@@ -380,17 +384,47 @@
   async function checkAuthAndModals() {
     if (!convex) return;
     const authBtnContainer = $('authButtons');
-    const token = localStorage.getItem('auth_token');
     
+    // OPTIMIZATION 1: INSTANT RENDER FROM CACHE (Fixes flicker)
+    const cachedUser = localStorage.getItem('cached_user');
+    if (cachedUser) {
+      try {
+        const u = JSON.parse(cachedUser);
+        let btns = '';
+        if (u.role === 'admin' || u.role === 'owner' || u.role === 'superadmin') { 
+          btns += `<a href="/tester" class="cta-btn-sm">Admin Panel</a>`; 
+        } else if (u.status === 'approved') { 
+          btns += `<a href="/tester" class="cta-btn-sm">Tester Panel</a>`; 
+        } 
+        btns += `<a href="/profile" class="cta-btn-sm secondary">My Profile</a>`;
+        authBtnContainer.innerHTML = btns;
+      } catch(e) {}
+    }
+
+    // OPTIMIZATION 2: BACKGROUND VERIFY WITH CONVEX
+    const token = localStorage.getItem('auth_token');
     if (!token) {
+      localStorage.removeItem('cached_user');
       authBtnContainer.innerHTML = `<a href="/login" class="cta-btn-sm secondary">Login</a><a href="/register" class="cta-btn-sm">Register</a>`;
       return;
     }
 
     const profile = await convex.query("auth:getCurrentUser", { token });
-    
     if (profile) {
-      // FIX: Added && profile.admin_message !== "null" to ignore bad CSV imports
+      // Update cache with fresh data
+      localStorage.setItem('cached_user', JSON.stringify(profile));
+      
+      // Re-render in case role/status changed
+      let btns = '';
+      if (profile.role === 'admin' || profile.role === 'owner' || profile.role === 'superadmin') { 
+        btns += `<a href="/tester" class="cta-btn-sm">Admin Panel</a>`; 
+      } else if (profile.status === 'approved') { 
+        btns += `<a href="/tester" class="cta-btn-sm">Tester Panel</a>`; 
+      } 
+      btns += `<a href="/profile" class="cta-btn-sm secondary">My Profile</a>`;
+      authBtnContainer.innerHTML = btns;
+
+      // Handle admin messages
       if (profile.status === 'rejected' && profile.admin_message && profile.admin_message !== "null") {
         await showStatusModal('Application Denied', profile.admin_message || 'Your application was rejected.', 'rejected');
         await convex.mutation("auth:clearRejection", { token });
@@ -403,15 +437,10 @@
         return;
       }
       
-      let btns = '';
-      if (profile.role === 'admin' || profile.role === 'owner' || profile.role === 'superadmin') { 
-        btns += `<a href="/tester" class="cta-btn-sm">Admin Panel</a>`; 
-      } else if (profile.status === 'approved') { 
-        btns += `<a href="/tester" class="cta-btn-sm">Tester Panel</a>`; 
-      } 
-      btns += `<a href="/profile" class="cta-btn-sm secondary">My Profile</a>`;
-      authBtnContainer.innerHTML = btns;
     } else {
+      // Token is invalid/expired
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('cached_user');
       authBtnContainer.innerHTML = `<a href="/login" class="cta-btn-sm secondary">Login</a><a href="/register" class="cta-btn-sm">Register</a>`;
     }
   }

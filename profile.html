@@ -398,10 +398,10 @@
 
       await renderStats(currentProfileMcName);
 
-      // Convex Realtime: automatically re-renders stats when database changes
+      // FIX: Removed .catch() to prevent JavaScript crash that blocked the Settings button
       convex.onUpdate("profile:getProfileStats", { mc_name: currentProfileMcName }, (data) => {
         if (data) renderStats(currentProfileMcName);
-      }).catch(err => console.warn('Realtime unavailable on profile:', err));
+      });
 
       if (!isViewingOther) {
         $('saveNameBtn').onclick = handleNameChange; 
@@ -488,7 +488,7 @@
       if (newPass.length < 6) return toast('New password must be at least 6 chars', 'error'); 
       const btn = $('changePassBtn'); btn.disabled = true; btn.textContent = 'Verifying...'; 
       try { 
-        await convex.action("profile:changePassword", { token: currentToken, currentPass, newPass }); 
+        await convex.action("profileActions:changePassword", { token: currentToken, currentPass, newPass }); 
         toast('Password updated successfully!'); 
         $('currentPass').value = ''; $('newPass').value = ''; 
       } catch (err) { toast(getErr(err), 'error'); } 
@@ -502,6 +502,5 @@
     
     init();
   </script>
-  <script>if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').then(reg => console.log('✅ SW registered!')).catch(err => console.log('❌ SW failed:', err)); }); }</script>
 </body>
 </html>

@@ -9,6 +9,10 @@
   <link rel="shortcut icon" type="image/png" href="/icon/website.png"/>
   <link rel="apple-touch-icon" href="/icon/website.png"/>
 
+  <!-- OPTIMIZATION: Preconnect to Convex to establish network connection early -->
+  <link rel="preconnect" href="https://canny-bird-190.convex.cloud">
+  <link rel="dns-prefetch" href="https://canny-bird-190.convex.cloud">
+
   <meta property="og:type" content="website"/>
   <meta property="og:title" content="CDTiers | Cracked Minecraft PvP Tierlist"/>
   <meta property="og:description" content="The definitive ranking platform for cracked Minecraft PvP players. Compete across 7 gamemodes, earn tiers, and climb the global leaderboard."/>
@@ -249,24 +253,6 @@
 
     @media(max-width:1024px){.nav-center{display:none}}
     @media(max-width:480px){header{margin:8px 8px 0;border-radius:12px;height:58px}main{padding:0 8px 40px}.hero{padding:50px 16px 40px}.hero-cta{flex-direction:column;width:100%}.btn-primary,.btn-secondary{width:100%;justify-content:center}.nav-brand img{height:30px}}
-
-    .hero-title .highlight { text-shadow: 0 0 30px rgba(251, 191, 36, 0.4), 0 0 60px rgba(251, 191, 36, 0.2); }
-    .btn-primary { box-shadow: 0 4px 18px rgba(139, 92, 246, 0.35), 0 0 0 0 rgba(139, 92, 246, 0.3); }
-    .btn-primary:hover { box-shadow: 0 8px 28px rgba(139, 92, 246, 0.6), 0 0 25px rgba(139, 92, 246, 0.4); }
-    .btn-secondary:hover { border-color: var(--accent); box-shadow: 0 0 20px rgba(139, 92, 246, 0.2); }
-    .player-preview.rank-1 { border-color: rgba(251, 191, 36, 0.4); box-shadow: 0 0 25px rgba(251, 191, 36, 0.15); }
-    .player-preview.rank-1::before { box-shadow: 0 0 15px rgba(251, 191, 36, 0.6); }
-    .player-preview.rank-1:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 10px 35px rgba(0,0,0,0.4), 0 0 40px rgba(251, 191, 36, 0.3); }
-    .cat-card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.3), 0 0 20px var(--cat-glow, rgba(139,92,246,0.2)); }
-    .hero-decor .float-icon { box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 15px var(--glow-color, transparent); }
-    .hero-decor .fi-1 { --glow-color: rgba(251, 191, 36, 0.5); }
-    .hero-decor .fi-2 { --glow-color: rgba(203, 213, 225, 0.5); }
-    .hero-decor .fi-3 { --glow-color: rgba(217, 119, 6, 0.5); }
-    .hero-decor .fi-4 { --glow-color: rgba(139, 92, 246, 0.5); }
-    .stat-card:hover .stat-value.gold { text-shadow: 0 0 15px rgba(251, 191, 36, 0.5); }
-    .stat-card:hover .stat-value.purple { text-shadow: 0 0 15px rgba(167, 139, 250, 0.5); }
-    .stat-card:hover .stat-value.silver { text-shadow: 0 0 15px rgba(148, 163, 184, 0.5); }
-    .stat-card:hover .stat-value.bronze { text-shadow: 0 0 15px rgba(217, 119, 6, 0.5); }
   </style>
 </head>
 <body>
@@ -457,23 +443,39 @@
   async function checkAuthAndModals() {
     if (!convex) return;
     const authBtnContainer = $('authButtons');
-    const token = localStorage.getItem('auth_token');
     
+    // 1. INSTANT RENDER FROM CACHE (Fixes flicker)
+    const cachedUser = localStorage.getItem('cached_user');
+    if (cachedUser) {
+      try {
+        const u = JSON.parse(cachedUser);
+        let btns = `<a href="/profile?id=${u._id}" class="cta-btn-sm secondary">My Profile</a>`;
+        btns += `<button id="logoutBtn" class="cta-btn-sm secondary">Sign Out</button>`;
+        authBtnContainer.innerHTML = btns;
+        const logoutBtn = $('logoutBtn');
+        if(logoutBtn) logoutBtn.onclick = async () => { localStorage.removeItem('auth_token'); localStorage.removeItem('cached_user'); window.location.reload(); };
+      } catch(e) {}
+    }
+
+    // 2. BACKGROUND VERIFY WITH CONVEX
+    const token = localStorage.getItem('auth_token');
     if (!token) {
+      localStorage.removeItem('cached_user');
       authBtnContainer.innerHTML = `<a href="/login" class="cta-btn-sm secondary">Login</a><a href="/register" class="cta-btn-sm">Register</a>`;
       return;
     }
 
     const profile = await convex.query("auth:getCurrentUser", { token });
-    
     if (profile) {
+      localStorage.setItem('cached_user', JSON.stringify(profile));
+      
       if (profile.status !== 'suspended') {
-        if (profile.status === 'rejected' && profile.admin_message) {
+        if (profile.status === 'rejected' && profile.admin_message && profile.admin_message !== "null") {
           await showStatusModal('Application Denied', profile.admin_message || 'Your application was rejected.', 'rejected');
           await convex.mutation("auth:clearRejection", { token });
           window.location.reload();
           return;
-        } else if (profile.status === 'approved' && profile.admin_message) {
+        } else if (profile.status === 'approved' && profile.admin_message && profile.admin_message !== "null") {
           await showStatusModal('Application Accepted!', profile.admin_message, 'approved');
           await convex.mutation("auth:clearAdminMessage", { token });
           window.location.reload();
@@ -483,11 +485,12 @@
 
       let btns = `<a href="/profile?id=${profile._id}" class="cta-btn-sm secondary">My Profile</a>`;
       btns += `<button id="logoutBtn" class="cta-btn-sm secondary">Sign Out</button>`;
-      
       authBtnContainer.innerHTML = btns;
       const logoutBtn = $('logoutBtn');
-      if(logoutBtn) logoutBtn.onclick = async () => { localStorage.removeItem('auth_token'); window.location.reload(); };
+      if(logoutBtn) logoutBtn.onclick = async () => { localStorage.removeItem('auth_token'); localStorage.removeItem('cached_user'); window.location.reload(); };
     } else {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('cached_user');
       authBtnContainer.innerHTML = `<a href="/login" class="cta-btn-sm secondary">Login</a><a href="/register" class="cta-btn-sm">Register</a>`;
     }
   }

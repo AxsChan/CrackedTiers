@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CDTIERS | Tester Panel</title>
   <link rel="icon" type="image/png" href="/icon/website.png" /> 
+  
+  <!-- OPTIMIZATION: Preconnect to Convex -->
+  <link rel="preconnect" href="https://canny-bird-190.convex.cloud">
+  <link rel="dns-prefetch" href="https://canny-bird-190.convex.cloud">
+
   <link rel="preconnect" href="https://fonts.googleapis.com"> 
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -386,7 +391,7 @@
         });
 
         if (newPass && isAdmin) { 
-          await convex.mutation("admin:adminUpdatePassword", { token: currentToken, userId: currentEditUserId, password: newPass }); 
+          await convex.action("adminActions:adminUpdatePassword", { token: currentToken, userId: currentEditUserId, password: newPass }); 
         }
         
         toast(`${newMcName} updated successfully!`); currentEditName = newMcName; $('editName').textContent = newMcName; $('editAvatar').src = `https://mc-heads.net/avatar/${newMcName}/64`;
@@ -584,7 +589,6 @@
       catch(err) { toast(getErr(err), 'error'); } 
     };
     window.unsuspendAccount = async (userId) => { 
-      const target = await convex.query("admin:getTesterByName", { name: currentEditName }); // simplified check
       try { await convex.mutation("admin:unsuspend", { token: currentToken, userId }); toast('Account unsuspended.'); refreshAdminLists(); } 
       catch(err) { toast(getErr(err), 'error'); } 
     };
@@ -628,16 +632,29 @@
       } 
     }
 
-    async function handleLogout() { localStorage.removeItem('auth_token'); window.location.href = '/login'; }
+    async function handleLogout() { localStorage.removeItem('auth_token'); localStorage.removeItem('cached_user'); window.location.href = '/login'; }
+    
     async function init() {
       try {
         const token = localStorage.getItem('auth_token');
         if (!token) { window.location.href = '/login'; return; }
         currentToken = token;
         
+        // OPTIMIZATION: INSTANT RENDER FROM CACHE
+        const cachedUser = localStorage.getItem('cached_user');
+        if (cachedUser) {
+          try {
+            currentUser = JSON.parse(cachedUser);
+            if (currentUser.status === 'approved') showPanel();
+          } catch(e) {}
+        }
+
+        // BACKGROUND VERIFY WITH CONVEX
         const profile = await convex.query("auth:getCurrentUser", { token });
-        if (!profile) { localStorage.removeItem('auth_token'); window.location.href = '/login'; return; }
+        if (!profile) { localStorage.removeItem('auth_token'); localStorage.removeItem('cached_user'); window.location.href = '/login'; return; }
+        
         currentUser = profile;
+        localStorage.setItem('cached_user', JSON.stringify(profile));
         
         if (profile.status === 'pending') { showScreen('pendingScreen'); }
         else if (profile.status === 'suspended') { 

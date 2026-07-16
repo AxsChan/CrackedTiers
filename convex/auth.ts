@@ -28,7 +28,7 @@ export const getCurrentUser = query({
     if (!args.token) return null;
     const user = await ctx.db.query("testers").withIndex("by_session", (q) => q.eq("session_token", args.token)).first();
     if (!user) return null;
-    const { password_hash, session_token, ...safeUser } = user;
+    const { password_hash, encrypted_password, session_token, ...safeUser } = user;
     return safeUser;
   },
 });
@@ -88,6 +88,21 @@ export const submitApplication = mutation({
     const user = await ctx.db.query("testers").withIndex("by_session", q => q.eq("session_token", args.token)).first();
     if (!user) throw new Error("Unauthorized");
     await ctx.db.patch(user._id, { app_answers: args.app_answers, status: "pending", admin_message: undefined });
+    return true;
+  },
+});
+
+// NEW: Added clearAdminMessage to fix the infinite loop
+export const clearAdminMessage = mutation({
+  args: { token: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("testers")
+      .withIndex("by_session", (q) => q.eq("session_token", args.token))
+      .first();
+    if (!user) throw new Error("Unauthorized");
+    
+    await ctx.db.patch(user._id, { admin_message: undefined });
     return true;
   },
 });

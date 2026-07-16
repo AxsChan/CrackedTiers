@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CDTIERS | Login</title>
   <link rel="icon" type="image/png" href="/icon/website.png" />
+  
+  <!-- OPTIMIZATION: Preconnect to Convex -->
+  <link rel="preconnect" href="https://canny-bird-190.convex.cloud">
+  <link rel="dns-prefetch" href="https://canny-bird-190.convex.cloud">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -14,7 +19,7 @@
     window.onloadTurnstileCallback = function () {
       if (window.turnstile) {
         window.turnstile.render('#turnstile-container', {
-          // 2. Use the Cloudflare Testing Key for Localhost
+          // Use your real sitekey for production
           sitekey: '0x4AAAAAADyXbLuHYN1Y70bv', 
           theme: 'dark',
           callback: function(token) { window.turnstileToken = token; },
@@ -23,7 +28,7 @@
       }
     };
   </script>
-  <!-- 3. Load the Turnstile API script with async defer -->
+  <!-- 2. Load the Turnstile API script with async defer -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback" async defer></script>
 
   <style>
@@ -154,13 +159,20 @@
         errBox.classList.add('hidden');
         
         try {
-          // FIX: Using convex.action instead of convex.mutation
           const result = await convex.action("authActions:login", { 
             loginInput, 
             password: pass,
             captchaToken: turnstileToken 
           });
+          
           localStorage.setItem('auth_token', result.token);
+          
+          // OPTIMIZATION: Cache the user profile so the navbar doesn't flicker on the next page
+          const profile = await convex.query("auth:getCurrentUser", { token: result.token });
+          if (profile) {
+            localStorage.setItem('cached_user', JSON.stringify(profile));
+          }
+          
           window.location.href = '/profile';
         } catch (err) {
           errBox.textContent = err.message || 'Login failed'; 

@@ -1,17 +1,21 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
+// FIX: Made case-insensitive so users can log in regardless of capital letters
 export const getUserByEmail = query({
   args: { email: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db.query("testers").withIndex("by_email", (q) => q.eq("email", args.email)).first();
+    const testers = await ctx.db.query("testers").collect();
+    return testers.find(t => (t.email || "").toLowerCase() === args.email.toLowerCase());
   },
 });
 
+// FIX: Made case-insensitive so users can log in regardless of capital letters
 export const getUserByUsername = query({
   args: { username: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db.query("testers").withIndex("by_username", (q) => q.eq("username", args.username)).first();
+    const testers = await ctx.db.query("testers").collect();
+    return testers.find(t => (t.username || "").toLowerCase() === args.username.toLowerCase());
   },
 });
 
@@ -92,7 +96,7 @@ export const submitApplication = mutation({
   },
 });
 
-// NEW: Added clearAdminMessage to fix the infinite loop
+// Added to fix the infinite spam loop on the frontend
 export const clearAdminMessage = mutation({
   args: { token: v.string() },
   handler: async (ctx, args) => {

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CDTIERS | Tester Application</title>
+  <link rel="icon" type="image/png" href="/icon/website.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root { --bg:#0a0e1a; --surface:#0f1524; --surface-2:#131a2b; --card:#171f33; --card-hover:#1c2540; --border:#1e2740; --border-light:#29334f; --text:#f0f2f8; --text-muted:#7a869e; --text-dim:#4d5878; --accent:#8b5cf6; --accent-2:#a78bfa; --gold:#fbbf24; --danger:#ef4444; --success:#22c55e; }
+    *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Geist',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x: hidden; }
+    body::before { content:''; position:fixed; inset:0; z-index:-1; background: radial-gradient(ellipse 60% 40% at 20% 10%, rgba(139,92,246,.08), transparent 60%),radial-gradient(ellipse 50% 40% at 80% 20%, rgba(251,191,36,.05), transparent 60%),radial-gradient(ellipse 70% 50% at 50% 90%, rgba(59,130,246,.06), transparent 60%); pointer-events:none; }
+    ::-webkit-scrollbar{width:6px;height:6px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:#29334f;border-radius:10px}
+    header{position:sticky;top:12px;z-index:100;max-width:1200px;margin:12px auto 0;background:rgba(15,21,36,.9);backdrop-filter:blur(20px) saturate(1.5);border:1px solid var(--border);border-radius:14px;padding:0 20px;height:66px;display:flex;align-items:center}
+    nav{width:100%;display:flex;align-items:center;gap:8px}
+    .nav-brand{text-decoration:none;display:flex;align-items:center;flex-shrink:0;height:100%;transition:transform .2s}
+    .nav-brand:hover{transform:translateY(-1px)}
+    .nav-brand img{height:42px;width:auto;image-rendering:pixelated;filter:drop-shadow(0 2px 10px rgba(251,191,36,.25));transition:filter .25s}
+    .nav-brand:hover img{filter:drop-shadow(0 3px 14px rgba(251,191,36,.45))}
+    .nav-center{display:flex;gap:4px;align-items:center;margin:0 auto}
+    .nav-link{padding:8px 16px;border-radius:10px;font-size:.92rem;font-weight:600;color:var(--text-muted);text-decoration:none;transition:all .2s;display:flex;align-items:center;gap:8px;cursor:pointer}
+    .nav-link:hover{color:var(--text);background:rgba(255,255,255,.04)} .nav-link.active{color:var(--text)} .nav-link svg{width:18px;height:18px;flex-shrink:0}
+    .nav-right{display:flex;gap:10px;align-items:center;flex-shrink:0}
+    .cta-btn-sm{display:inline-flex;align-items:center;gap:6px;padding:0 18px;height:38px;background:linear-gradient(135deg,var(--accent),var(--accent-2));border:none;border-radius:10px;color:#fff;font-family:inherit;font-size:.88rem;font-weight:700;text-decoration:none;cursor:pointer;transition:transform .2s, box-shadow .2s;box-shadow:0 2px 12px rgba(139,92,246,.35);}
+    .cta-btn-sm:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(139,92,246,.55)} .cta-btn-sm.secondary{background:rgba(255,255,255,.04);border:1px solid var(--border-light);color:var(--text);box-shadow:none} .cta-btn-sm.secondary:hover{background:rgba(255,255,255,.08)}
+    main { max-width: 800px; margin: 0 auto; padding: 40px 20px; min-height: calc(100vh - 100px); }
+    .apply-header { text-align: center; margin-bottom: 24px; }
+    .logo-text { font-size: 1.8rem; font-weight: 900; text-decoration:none; color:var(--text); } .logo-text span { color: var(--gold); text-shadow: 0 0 20px rgba(251, 191, 36, 0.4); }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    .form-group { margin-bottom: 16px; position: relative; } 
+    .form-label { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; } 
+    .form-input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border-light); background: var(--card); color: var(--text); font-family: inherit; font-size: 0.9rem; outline: none; transition: 0.2s; resize: vertical; } 
+    .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(139,92,246,.15); } 
+    .btn { padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; border: none; font-size: 0.9rem; font-family: inherit; text-align:center; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; margin-top:10px; } 
+    .btn-primary { background: var(--success); color: #fff; } .btn-primary:hover { background: #16a34a; transform: translateY(-2px); } .btn-secondary { background: var(--card); color: var(--text-muted); border: 1px solid var(--border-light); } .btn-secondary:hover { background: var(--card-hover); color: var(--text); } .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+    .error-msg { color: var(--danger); text-align: center; margin-top: 12px; font-size: 0.85rem; font-weight: 600; } 
+    .divider { height: 1px; background: var(--border); margin: 24px 0; } 
+    p { color:var(--text-muted); font-size:0.9rem; margin-top:4px; } 
+    .hidden { display: none !important; }
+    .login-wrap { min-height: calc(100vh - 140px); display: flex; align-items: center; justify-content: center; }
+    .login-box { width: 100%; max-width: 500px; }
+    .login-header { text-align: center; margin-bottom: 24px; }
+    @media(max-width:768px){.nav-center{display:none}}
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a class="nav-brand" href="/home" title="CDTiers"><img src="/icon/cdtiers.png" alt="CDTiers" onerror="this.style.display='none'"></a>
+      <div class="nav-center">
+        <a class="nav-link" href="/home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</a>
+        <a class="nav-link" href="/index"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0z"/></svg>Rankings</a>
+        <a class="nav-link active" href="/tester"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Tester Panel</a>
+      </div>
+      <div class="nav-right"><a href="/profile" class="cta-btn-sm secondary">My Profile</a></div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Denied Screen -->
+    <div id="rejectedScreen" class="login-wrap hidden">
+      <div class="login-box">
+        <div class="login-header">
+          <a href="/home" class="logo-text">Application <span>Denied</span></a>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-top:4px;">Please read the reason below</p>
+        </div>
+        <div class="card">
+          <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 14px; margin-bottom: 20px; text-align: left;">
+            <strong style="color: var(--danger); display: block; margin-bottom: 5px;">Reason:</strong>
+            <p id="rejectedReason" style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">No reason provided.</p>
+          </div>
+          <button id="acknowledgeBtn" class="btn btn-primary" style="margin-bottom: 10px;">Okay</button>
+          <a href="/profile" class="btn btn-secondary">My Profile</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Application Form -->
+    <div id="applyFormWrapper" class="hidden">
+      <div class="apply-header">
+        <a href="/home" class="logo-text">Tester <span>Application</span></a>
+        <p>Fill out the interview form to apply</p>
+      </div>
+      <div class="card">
+        <div id="applyClosedMsg" class="error-msg hidden" style="margin-bottom: 15px;">Tester applications are currently closed. Please check back later.</div>
+        <div id="applyForm">
+          <div class="form-label" style="margin-bottom: 16px;">Interview Questions <span style="text-transform: none; color: var(--text-dim); font-size: 0.65rem;">(Max 500 chars per answer)</span></div>
+          
+          <div class="form-group">
+            <label class="form-label">1. Why do you want to become a tester for CDTiers? <span id="q1c" style="text-transform: none; color: var(--text-dim);">0/500</span></label>
+            <textarea id="q1" class="form-input" rows="3" placeholder="Explain your motivation..." maxlength="500"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">2. Describe your Minecraft PvP experience <span id="q2c" style="text-transform: none; color: var(--text-dim);">0/500</span></label>
+            <textarea id="q2" class="form-input" rows="3" placeholder="Detail your experience..." maxlength="500"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">3. How active are you? <span id="q3c" style="text-transform: none; color: var(--text-dim);">0/500</span></label>
+            <textarea id="q3" class="form-input" rows="2" placeholder="e.g. 10-15 hours per week" maxlength="500"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">4. Past experience ranking/evaluating? <span id="q4c" style="text-transform: none; color: var(--text-dim);">0/500</span></label>
+            <textarea id="q4" class="form-input" rows="3" placeholder="If yes, explain. If no, say N/A." maxlength="500"></textarea>
+          </div>
+
+          <div class="divider"></div>
+          <div class="form-group">
+            <label class="form-label">5. What are your main gamemodes? <span id="q5c" style="text-transform: none; color: var(--text-dim);">0/500</span></label>
+            <textarea id="q5" class="form-input" rows="2" placeholder="e.g., Sword, Axe, Crystal, SMP..." maxlength="500"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">6. What are your current tiers in those gamemodes? <span id="q6c" style="text-transform: none; color: var(--text-dim);">0/500</span></label>
+            <textarea id="q6" class="form-input" rows="2" placeholder="e.g., HT1 Sword, LT2 Axe, Unranked in Crystal..." maxlength="500"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">7. Do you have any alternative accounts (alts)? If yes, list them. <span id="q7c" style="text-transform: none; color: var(--text-dim);">0/500</span></label>
+            <textarea id="q7" class="form-input" rows="2" placeholder="If none, put N/A. Warning: Hiding alts results in a permanent ban." maxlength="500"></textarea>
+          </div>
+          
+          <button id="submitApplyBtn" class="btn btn-primary">Submit Application</button>
+          <div id="applyError" class="error-msg hidden"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/config.js"></script>
+  <script type="module">
+    import { ConvexClient } from 'https://esm.sh/convex/browser';
+    const convex = new ConvexClient(window.CONFIG.convex.url);
+    let currentToken = null;
+    let currentUser = null;
+    const $ = id => document.getElementById(id);
+
+    ['q1','q2','q3','q4','q5','q6','q7'].forEach(id => { 
+      const el = $(id); 
+      el.oninput = () => { $(id+'c').textContent = `${el.value.length}/500`; }; 
+    });
+
+    async function init() {
+      try {
+        const token = localStorage.getItem('auth_token');
+        if (!token) { window.location.href = '/login'; return; }
+        
+        currentToken = token;
+        const profile = await convex.query("auth:getCurrentUser", { token });
+        
+        if (!profile) { 
+          localStorage.removeItem('auth_token');
+          window.location.href = '/login'; 
+          return; 
+        }
+        
+        currentUser = profile;
+
+        if (profile.status === 'approved' || profile.status === 'pending' || profile.status === 'suspended' || profile.role === 'admin' || profile.role === 'owner' || profile.role === 'superadmin') {
+          window.location.href = '/tester';
+          return;
+        }
+
+        if (profile.status === 'rejected') {
+          $('rejectedScreen').classList.remove('hidden');
+          $('applyFormWrapper').classList.add('hidden');
+          $('rejectedReason').textContent = profile.admin_message || 'No reason provided.';
+          
+          $('acknowledgeBtn').onclick = async () => {
+            $('acknowledgeBtn').textContent = 'Clearing...';
+            $('acknowledgeBtn').disabled = true;
+            try {
+              await convex.mutation("auth:clearRejection", { token: currentToken });
+              window.location.href = '/profile';
+            } catch (err) {
+              $('acknowledgeBtn').textContent = 'Okay';
+              $('acknowledgeBtn').disabled = false;
+              alert(err.message || 'Unknown error');
+            }
+          };
+          return;
+        }
+
+        $('applyFormWrapper').classList.remove('hidden');
+        checkAppStatus();
+
+      } catch (err) {
+        console.error('Init error:', err);
+        window.location.href = '/login';
+      }
+    }
+
+    async function checkAppStatus() {
+      const settings = await convex.query("auth:getSettings", {});
+      if (settings && !settings.allow_applications) {
+        $('applyClosedMsg').classList.remove('hidden');
+        $('applyForm').classList.add('hidden');
+      }
+    }
+
+    $('submitApplyBtn').onclick = async () => {
+      const q1 = $('q1').value.trim(); 
+      const q2 = $('q2').value.trim(); 
+      const q3 = $('q3').value.trim(); 
+      const q4 = $('q4').value.trim();
+      const q5 = $('q5').value.trim(); 
+      const q6 = $('q6').value.trim(); 
+      const q7 = $('q7').value.trim();
+      
+      if (!q1 || !q2 || !q3 || !q4 || !q5 || !q6 || !q7) { 
+        $('applyError').textContent = 'Please answer all interview questions.'; 
+        $('applyError').classList.remove('hidden'); 
+        return; 
+      }
+      
+      const appAnswers = { q1, q2, q3, q4, q5, q6, q7 }; 
+      const btn = $('submitApplyBtn'); 
+      btn.disabled = true; btn.textContent = 'Submitting...'; 
+      $('applyError').classList.add('hidden');
+      
+      try {
+        await convex.mutation("auth:submitApplication", { 
+          token: currentToken, 
+          app_answers: appAnswers 
+        });
+        
+        window.location.href = '/tester';
+      } catch (err) { 
+        $('applyError').textContent = err.message || 'Unknown error'; 
+        $('applyError').classList.remove('hidden'); 
+        btn.disabled = false; 
+        btn.textContent = 'Submit Application'; 
+      }
+    };
+
+    init();
+  </script>
+</body>
+</html>

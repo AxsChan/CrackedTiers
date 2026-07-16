@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CDTIERS | Tester Panel</title>
+  <link rel="icon" type="image/png" href="/icon/website.png" /> 
+  <link rel="preconnect" href="https://fonts.googleapis.com"> 
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root { --bg:#0a0e1a; --surface:#0f1524; --surface-2:#131a2b; --card:#171f33; --card-hover:#1c2540; --border:#1e2740; --border-light:#29334f; --text:#f0f2f8; --text-muted:#7a869e; --text-dim:#4d5878; --accent:#8b5cf6; --accent-2:#a78bfa; --gold:#fbbf24; --discord:#5865F2; --success:#22c55e; --danger:#ef4444; --warning:#f59e0b; }
+    *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; } html { font-size:15px; scroll-behavior:smooth; } body { font-family:'Geist',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+    ::-webkit-scrollbar { width:6px; height:6px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:#29334f; border-radius:10px; }
+    header { position:sticky; top:12px; z-index:100; max-width:1000px; margin:12px auto 0; background:rgba(15,21,36,.9); backdrop-filter:blur(20px); border:1px solid var(--border); border-radius:14px; padding:0 20px; height:64px; display:flex; align-items:center; }
+    nav { width:100%; display:flex; align-items:center; gap:8px; } .nav-brand img { height:38px; image-rendering:pixelated; filter:drop-shadow(0 2px 10px rgba(251,191,36,.25)); } .nav-center { display:flex; gap:4px; align-items:center; margin:0 auto; } .nav-link { padding:8px 16px; border-radius:10px; font-size:.9rem; font-weight:600; color:var(--text-muted); text-decoration:none; transition:all .2s; display:flex; align-items:center; gap:8px; } .nav-link:hover { color:var(--text); background:rgba(255,255,255,.04); } .nav-link.active { color:var(--text); } .nav-link svg { width:18px; height:18px; }
+    main { max-width: 900px; margin: 0 auto; padding: 30px 20px 80px; }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding: 24px; margin-bottom: 20px; } .card-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; } .card-title span { color: var(--accent); } .card-title svg { width: 20px; height: 20px; color: var(--accent); }
+    .form-group { margin-bottom: 16px; position: relative; } .form-label { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; } .form-input, .form-select, textarea.form-input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border-light); background: var(--card); color: var(--text); font-family: inherit; font-size: 0.9rem; outline: none; transition: 0.2s; resize: vertical; } .form-input:focus, .form-select:focus, textarea.form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(139,92,246,.15); } .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; } .admin-search { margin-bottom: 15px; }
+    .btn { padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; border: none; font-size: 0.9rem; font-family: inherit; display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; text-decoration:none; } .btn svg { width: 18px; height: 18px; } .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 4px 14px rgba(139,92,246,.3); } .btn-primary:hover { background: #7c3aed; transform: translateY(-2px); } .btn-success { background: var(--success); color: #fff; } .btn-success:hover { background: #16a34a; transform: translateY(-2px); } .btn-danger { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); } .btn-danger:hover { background: rgba(239,68,68,0.2); } .btn-warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); } .btn-warning:hover { background: rgba(245, 158, 11, 0.2); } .btn-secondary { background: var(--card); color: var(--text-muted); border: 1px solid var(--border-light); } .btn-secondary:hover { background: var(--card-hover); color: var(--text); } .btn-full { width: 100%; } .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+    .login-wrap { min-height: calc(100vh - 100px); display: flex; align-items: center; justify-content: center; } .login-box { width: 100%; max-width: 500px; } .login-header { text-align: center; margin-bottom: 24px; } .logo-text { font-size: 1.8rem; font-weight: 900; } .logo-text span { color: var(--gold); } .error-msg { color: var(--danger); text-align: center; margin-top: 12px; font-size: 0.85rem; font-weight: 600; }
+    .tester-info { display: flex; justify-content: space-between; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px 24px; margin-bottom: 20px; }
+    .tabs { display: flex; gap: 6px; margin-bottom: 20px; background: var(--surface); padding: 6px; border-radius: 14px; border: 1px solid var(--border); } .tab-btn { flex: 1; padding: 12px; text-align: center; border-radius: 10px; background: transparent; color: var(--text-muted); border: none; cursor: pointer; font-weight: 700; font-family: inherit; font-size: 0.9rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; } .tab-btn svg { width: 18px; height: 18px; } .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.03); } .tab-btn.active { background: var(--card-hover); color: var(--text); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    .search-results, .account-list, .apply-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; } .search-item, .account-item, .apply-item { display: flex; align-items: flex-start; gap: 12px; padding: 16px; background: var(--card); border-radius: 8px; border: 1px solid var(--border); transition: 0.2s; } .search-item:hover { background: var(--card-hover); border-color: var(--accent); } .search-item img { width: 32px; height: 32px; border-radius: 6px; image-rendering: pixelated; } .search-item-info { flex: 1; font-weight: 700; font-size: 0.9rem; align-self: center; }
+    .account-item-info, .apply-item-info { flex: 1; } .account-item-name, .apply-item-name { font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 6px; margin-bottom: 4px; } .account-item-meta, .apply-item-meta { font-size: 0.8rem; color: var(--text-muted); } .apply-answers { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; } .apply-answer-block { background: var(--surface-2); border-radius: 6px; padding: 10px; border-left: 3px solid var(--accent); } .apply-answer-q { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; } .apply-answer-a { font-size: 0.9rem; color: var(--text); margin-top: 4px; line-height: 1.4; } .account-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .badge-role { font-size: 0.65rem; padding: 3px 8px; border-radius: 4px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; display: inline-flex; align-items: center; gap: 4px; } .badge-role svg { width: 12px; height: 12px; } .badge-admin { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); } .badge-tester { background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); } .badge-pending { background: rgba(122, 134, 158, 0.15); color: var(--text-muted); border: 1px solid var(--border-light); } .badge-rejected { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); } .badge-suspended { background: rgba(107, 33, 168, 0.15); color: #c026d3; border: 1px solid rgba(107, 33, 168, 0.3); } .badge-superadmin { background: rgba(139, 92, 246, 0.15); color: var(--accent-2); border: 1px solid rgba(139, 92, 246, 0.3); } .badge-owner { background: rgba(251, 191, 36, 0.15); color: var(--gold); border: 1px solid rgba(251, 191, 36, 0.3); }
+    .edit-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border); } .edit-header img { width: 64px; height: 64px; border-radius: 10px; image-rendering: pixelated; border: 2px solid var(--border-light); } .edit-header h2 { font-size: 1.5rem; font-weight: 900; } .edit-header p { color: var(--text-muted); font-size: 0.8rem; }
+    .gamemode-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-bottom: 20px; } .gamemode-item { background: var(--card); padding: 14px; border-radius: 10px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; transition: border-color 0.2s; } .gamemode-item:hover { border-color: var(--border-light); } .gamemode-label { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 0.95rem; color: var(--text); } .gamemode-label img { width: 24px; height: 24px; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+    .toggle-switch { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; } .switch { position: relative; display: inline-block; width: 46px; height: 26px; flex-shrink: 0; } .switch input { opacity: 0; width: 0; height: 0; } .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #29334f; transition: .3s; border-radius: 26px; border: 1px solid var(--border-light); } .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: var(--text-muted); transition: .3s; border-radius: 50%; } input:checked + .slider { background-color: var(--success); border-color: var(--success); } input:checked + .slider:before { transform: translateX(20px); background-color: #fff; }
+    .region-badge { display:inline-flex; align-items:center; justify-content:center; padding:6px 12px; border-radius:7px; font-size:.75rem; font-weight:900; letter-spacing:.04em; color:#fff; min-width:44px; text-align:center; line-height:1; text-shadow:0 1px 2px rgba(0,0,0,.35); box-shadow:inset 0 -2px 0 rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.08); } .region-badge.na { background:#1d4ed8; } .region-badge.eu { background:#15803d; } .region-badge.as, .region-badge.asia { background:#7c3aed; } .region-badge.sa { background:#ea580c; } .region-badge.oce, .region-badge.au { background:#0891b2; } .region-badge.empty { background:transparent; border:1px dashed var(--border-light); color:var(--text-dim); font-weight:700; box-shadow:none; text-shadow:none; }
+    .custom-select { position: relative; width: 100%; } .custom-select-trigger { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border-light); background: var(--card); color: var(--text); font-family: inherit; font-size: 0.9rem; cursor: pointer; transition: 0.2s; text-align: left; } .custom-select-trigger:hover { border-color: var(--accent); } .custom-select-menu { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 10; background: var(--surface-2); border: 1px solid var(--border-light); border-radius: 10px; padding: 6px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); max-height: 250px; overflow-y: auto; } .custom-option { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; transition: background 0.15s; font-size: 0.9rem; color: var(--text); } .custom-option:hover { background: var(--card-hover); }
+    .divider { height: 1px; background: var(--border); margin: 24px 0; } .toast { position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; font-weight: 600; transform: translateY(100px); opacity: 0; transition: 0.3s; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-width: 90vw; } .toast.show { transform: translateY(0); opacity: 1; } .toast.success { background: var(--success); color: #fff; } .toast.error { background: var(--danger); color: #fff; } .hidden { display: none !important; }
+    @media (max-width: 768px) { .nav-center { display: none; } .form-row { grid-template-columns: 1fr; } .tester-info { flex-direction: column; gap: 10px; text-align: center; } .account-item, .apply-item { flex-wrap: wrap; } .account-item-info, .apply-item-info { width: 100%; order: -1; } .tabs { flex-direction: column; } }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a class="nav-brand" href="/index"><img src="/icon/cdtiers.png" alt="Logo" onerror="this.style.display='none'"></a>
+      <div class="nav-center">
+        <a class="nav-link" href="/index"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0z"/></svg>Rankings</a>
+        <a class="nav-link active" href="/tester"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Tester Panel</a>
+      </div>
+      <div class="nav-right"><button id="logoutBtn" class="btn btn-secondary hidden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sign Out</button></div>
+    </nav>
+  </header>
+  
+  <main>
+    <div id="pendingScreen" class="login-wrap hidden">
+      <div class="login-box">
+        <div class="login-header"><div class="logo-text">Pending <span>Approval</span></div></div>
+        <div class="card"><p style="text-align:center; color:var(--text-muted); margin-bottom: 20px;">Your application has been submitted! An administrator needs to review your answers and approve your account before you can access the dashboard.</p><a href="/profile" class="btn btn-primary btn-full">My Profile</a></div>
+      </div>
+    </div>
+    
+    <div id="suspendedScreen" class="login-wrap hidden">
+      <div class="login-box">
+        <div class="login-header"><div class="logo-text">Account <span>Suspended</span></div></div>
+        <div class="card">
+          <p id="suspendedDesc" style="text-align:center; color:var(--text-muted); margin-bottom: 20px;">Your account has been suspended by an administrator.</p>
+          <a href="/profile" class="btn btn-primary btn-full" style="margin-bottom: 10px;">Go to Profile</a>
+          <button id="logoutBtn4" class="btn btn-danger btn-full">Sign Out</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="rejectedScreen" class="login-wrap hidden">
+      <div class="login-box">
+        <div class="login-header"><div class="logo-text">Application <span>Rejected</span></div></div>
+        <div class="card">
+          <p id="rejectedDesc" style="text-align:center; color:var(--text-muted); margin-bottom: 20px;">Your application to become a tester was rejected.</p>
+          <a href="/apply" class="btn btn-primary btn-full" style="margin-bottom: 10px;">View Reason & Reapply</a>
+          <a href="/profile" class="btn btn-secondary btn-full">Back to Profile</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="notTesterScreen" class="login-wrap hidden">
+      <div class="login-box">
+        <div class="login-header"><div class="logo-text">Access <span>Denied</span></div></div>
+        <div class="card">
+          <p style="text-align:center; color:var(--text-muted); margin-bottom: 20px;">You are not a tester yet. If you want to test players and manage ranks, you must apply first.</p>
+          <a href="/apply" class="btn btn-primary btn-full" style="margin-bottom: 10px;">Apply Now</a>
+          <a href="/profile" class="btn btn-secondary btn-full">Back to Profile</a>
+        </div>
+      </div>
+    </div>
+    
+    <div id="testerPanel" class="hidden">
+      <div class="tester-info"><div style="font-size: 1rem; font-weight: 700;">Welcome, <span id="currentUser" style="color:var(--accent);">Tester</span></div><button id="logoutBtn2" class="btn btn-danger">Sign Out</button></div>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="players"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="11" x2="10" y2="11"/><line x1="8" y1="9" x2="8" y2="13"/><line x1="15" y1="12" x2="15.01" y2="12"/><line x1="18" y1="10" x2="18.01" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258A4 4 0 0 0 17.32 5z"/></svg> Manage Players</button>
+        <button class="tab-btn hidden" id="adminTabBtn" data-tab="admin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Admin Panel</button>
+      </div>
+      
+      <div id="tab-players" class="tab-content">
+        <div class="card">
+          <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> <span>Search Registered Player to Edit</span></div>
+          <input type="text" id="searchPlayer" class="form-input" placeholder="Type registered Minecraft username...">
+          <div id="searchResults" class="search-results"></div>
+        </div>
+        <div id="editPanel" class="card hidden">
+          <div class="edit-header"><img id="editAvatar" src="https://mc-heads.net/avatar/Steve/64" alt="Avatar"><div><h2 id="editName">Player Name</h2><p>Update credentials and tiers below.</p></div></div>
+          
+          <div class="form-group hidden" id="editBioGroup" style="margin-bottom: 20px;">
+            <label class="form-label">Player Bio <span id="bioCounter" style="text-transform: none; color: var(--text-dim);">0/250</span></label>
+            <textarea id="editBio" class="form-input" rows="3" placeholder="Enter player bio..." maxlength="250"></textarea>
+          </div>
+          
+          <div class="form-row hidden" id="editProfileRow" style="margin-bottom: 24px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Minecraft Username</label>
+              <input type="text" id="editMcName" class="form-input" placeholder="MC Username">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Region</label>
+              <div class="custom-select" id="editRegionSelect">
+                <input type="hidden" id="editRegionInput" value="NA">
+                <button type="button" class="custom-select-trigger" id="editRegionTrigger"><span id="editRegionLabel"><span class="region-badge na">NA</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+                <div class="custom-select-menu hidden" id="editRegionMenu">
+                  <div class="custom-option" data-value="NA"><span class="region-badge na">NA</span> North America</div>
+                  <div class="custom-option" data-value="EU"><span class="region-badge eu">EU</span> Europe</div>
+                  <div class="custom-option" data-value="ASIA"><span class="region-badge as">ASIA</span> Asia</div>
+                  <div class="custom-option" data-value="OCE"><span class="region-badge oce">OCE</span> Oceania</div>
+                  <div class="custom-option" data-value="SA"><span class="region-badge sa">SA</span> South America</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group hidden" id="editPassGroup" style="margin-bottom: 24px;"><label class="form-label">Reset Password (Admin Only)</label><input type="password" id="editNewPass" class="form-input" placeholder="Enter new password (min 6 chars)"></div>
+          
+          <div class="form-label" style="margin-bottom: 16px;">Gamemode Tiers</div><div id="gamemodeGrid" class="gamemode-grid"></div>
+          <div class="divider"></div>
+          
+          <div class="form-label" id="altListLabel" style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg> Detected Alt Accounts (via IP)</div>
+          <div id="altList" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px;"></div>
+          
+          <button id="savePlayerBtn" class="btn btn-success btn-full">Save All Changes</button>
+          
+          <div class="divider hidden" id="editDeleteDivider"></div>
+          <div class="form-group hidden" id="editDeleteGroup">
+            <button id="suspendAccBtn" class="btn btn-warning btn-full" style="margin-bottom: 8px;">Suspend Account</button>
+            <button id="banIpBtn" class="btn btn-danger btn-full" style="margin-bottom: 8px;">Ban User's IP</button>
+            <button id="deletePlayerAccountBtn" class="btn btn-danger btn-full">Delete Account Permanently</button>
+          </div>
+        </div>
+      </div>
+      
+      <div id="tab-admin" class="tab-content hidden">
+        <div class="card">
+          <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> <span>Site Settings</span></div>
+          <div class="toggle-switch"><div><div style="font-weight: 700; font-size: 0.95rem;">Allow User Registration</div><div style="font-size: 0.8rem; color: var(--text-muted);">Close registration to stop new accounts from being created.</div></div><label class="switch"><input type="checkbox" id="toggleReg" checked><span class="slider"></span></label></div>
+          <div class="toggle-switch"><div><div style="font-weight: 700; font-size: 0.95rem;">Allow Tester Applications</div><div style="font-size: 0.8rem; color: var(--text-muted);">Close applications to stop users from applying to be testers.</div></div><label class="switch"><input type="checkbox" id="toggleApp" checked><span class="slider"></span></label></div>
+          <div class="toggle-switch"><div><div style="font-weight: 700; font-size: 0.95rem;">Auto-Clear Rejected Applications</div><div style="font-size: 0.8rem; color: var(--text-muted);">Automatically clears rejected apps so users can apply again.</div></div><select id="toggleRejectedExp" class="form-select" style="width: auto; padding: 8px 12px; border-radius: 8px;"><option value="0">Never</option><option value="1">After 1 Hour</option><option value="24">After 1 Day</option><option value="168">After 7 Days</option><option value="336">After 14 Days</option><option value="720">After 30 Days</option></select></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span>Pending Applications</span></div>
+          <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <input type="text" id="searchPending" class="form-input" placeholder="Search pending by name or email..." style="margin-bottom: 0;">
+            <button id="rejectAllBtn" class="btn btn-danger" style="width: auto; padding: 12px 16px; white-space: nowrap;" onclick="rejectAllApps()">Reject All</button>
+          </div>
+          <div id="applyList" class="apply-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> <span>Suspended Accounts</span></div>
+          <input type="text" id="searchSuspended" class="form-input admin-search" placeholder="Search suspended accounts...">
+          <div id="suspendedList" class="account-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> <span>Banned IP Addresses</span></div>
+          <div id="bannedIpsList" class="account-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> <span>Manage Staff Roles</span></div>
+          <input type="text" id="searchActive" class="form-input admin-search" placeholder="Search active accounts...">
+          <div id="accountList" class="account-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> <span>Rejected Applications</span></div>
+          <input type="text" id="searchRejected" class="form-input admin-search" placeholder="Search rejected applications...">
+          <div id="rejectedList" class="account-list"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <div id="toast" class="toast"></div>
+
+  <script src="/config.js"></script>
+  <script type="module">
+    import { ConvexClient } from 'https://esm.sh/convex/browser';
+    const convex = new ConvexClient(window.CONFIG.convex.url);
+    const CATS = [{ key: 'sword', label: 'Sword', icon: '⚔️' },{ key: 'axe', label: 'Axe', icon: '🪓' },{ key: 'crystal', label: 'Crystal', icon: '💎' },{ key: 'nethpot', label: 'Nethpot', icon: '🧪' },{ key: 'pot', label: 'Pot', icon: '🍯' },{ key: 'uhc', label: 'UHC', icon: '❤️' },{ key: 'smp', label: 'SMP', icon: '🏠' },{ key: 'mace', label: 'Mace', icon: '🔨' }];
+    const TIERS = ['HT1','LT1','HT2','LT2','HT3','LT3','HT4','LT4','HT5','LT5'];
+    let currentToken = null; let currentUser = null; let currentEditName = ''; let currentEditUserId = null; let currentEditIp = ''; let searchDebounce, pendingSearchDeb, activeSearchDeb, rejectedSearchDeb, suspendedSearchDeb;
+    const $ = id => document.getElementById(id);
+    const getErr = (err) => { if (!err) return 'Unknown error'; if (typeof err === 'string') return err; if (err.message) return err.message; try { return JSON.stringify(err); } catch (e) { return 'Unknown error object'; } };
+    const toast = (msg, type = 'success') => { const t = $('toast'); t.textContent = msg; t.className = `toast ${type} show`; setTimeout(() => t.classList.remove('show'), 3500); };
+
+    const HIGH_ROLES = ['superadmin', 'owner', 'admin'];
+    const isManagement = (role) => HIGH_ROLES.includes(role);
+    const canAssignRoles = (role) => ['superadmin', 'owner'].includes(role);
+
+    function parseDuration(str) {
+        const match = str.match(/^(\d+)([hdwmy])$/);
+        if (!match) return null;
+        const num = parseInt(match[1]);
+        const unit = match[2];
+        const ms = { h: 3600000, d: 86400000, w: 604800000, m: 2592000000, y: 31536000000 };
+        return num * ms[unit];
+    }
+
+    function customSuspendModal(title) {
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s ease forwards;';
+            const box = document.createElement('div');
+            box.style.cssText = 'background:var(--surface-2);border:1px solid var(--border-light);border-radius:16px;padding:24px;width:calc(100% - 32px);max-width:400px;box-shadow:0 20px 50px rgba(0,0,0,.5);font-family:inherit;color:var(--text);';
+            const h3 = document.createElement('h3'); h3.textContent = title; h3.style.cssText = 'font-size:1.1rem;font-weight:800;margin-bottom:16px;color:var(--text);';
+            
+            const durInput = document.createElement('input'); 
+            durInput.placeholder = 'Duration (e.g., 1h, 1d, 1w, 1m, 1y)';
+            durInput.style.cssText = 'width:100%;padding:12px;border-radius:10px;border:1px solid var(--border-light);background:var(--card);color:var(--text);font-family:inherit;font-size:0.9rem;outline:none;resize:vertical;min-height:40px;margin-bottom:16px;box-sizing:border-box;';
+            
+            const textarea = document.createElement('textarea'); 
+            textarea.placeholder = 'Reason for suspension...';
+            textarea.style.cssText = 'width:100%;padding:12px;border-radius:10px;border:1px solid var(--border-light);background:var(--card);color:var(--text);font-family:inherit;font-size:0.9rem;outline:none;resize:vertical;min-height:80px;margin-bottom:20px;box-sizing:border-box;';
+            
+            const btnWrap = document.createElement('div'); btnWrap.style.cssText = 'display:flex;gap:10px;justify-content:flex-end;';
+            const cancelBtn = document.createElement('button'); cancelBtn.textContent = 'Cancel'; 
+            cancelBtn.style.cssText = 'padding:10px 18px;border-radius:8px;border:1px solid var(--border-light);background:var(--card);color:var(--text-muted);cursor:pointer;font-family:inherit;font-weight:700;transition:.2s;';
+            cancelBtn.onclick = () => { resolve(null); overlay.remove(); };
+            const okBtn = document.createElement('button'); okBtn.textContent = 'Suspend'; 
+            okBtn.style.cssText = 'padding:10px 18px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;cursor:pointer;font-family:inherit;font-weight:700;transition:.2s;';
+            okBtn.onclick = () => { resolve({ duration: durInput.value, reason: textarea.value }); overlay.remove(); };
+            
+            btnWrap.appendChild(cancelBtn); btnWrap.appendChild(okBtn);
+            box.appendChild(h3); box.appendChild(durInput); box.appendChild(textarea); box.appendChild(btnWrap);
+            overlay.appendChild(box); document.body.appendChild(overlay);
+            setTimeout(() => durInput.focus(), 100);
+        });
+    }
+
+    const SVG_ROLE_ADMIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+    const SVG_ROLE_TESTER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
+    const SVG_ROLE_PENDING = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+    const SVG_ROLE_REJECTED = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+    const SVG_ROLE_SUSPENDED = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+    const SVG_ROLE_OWNER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>';
+    const SVG_ROLE_SUPERADMIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>';
+
+    const getRoleBadge = (role) => {
+      if (role === 'superadmin') return `<span class="badge-role badge-superadmin">${SVG_ROLE_SUPERADMIN} Superadmin</span>`;
+      if (role === 'owner') return `<span class="badge-role badge-owner">${SVG_ROLE_OWNER} Owner</span>`;
+      if (role === 'admin') return `<span class="badge-role badge-admin">${SVG_ROLE_ADMIN} Admin</span>`;
+      return `<span class="badge-role badge-tester">${SVG_ROLE_TESTER} Tester</span>`;
+    };
+
+    function customPrompt(title, placeholder = '') {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s ease forwards;';
+        const box = document.createElement('div');
+        box.style.cssText = 'background:var(--surface-2);border:1px solid var(--border-light);border-radius:16px;padding:24px;width:calc(100% - 32px);max-width:400px;box-shadow:0 20px 50px rgba(0,0,0,.5);font-family:inherit;color:var(--text);';
+        const h3 = document.createElement('h3'); h3.textContent = title; h3.style.cssText = 'font-size:1.1rem;font-weight:800;margin-bottom:16px;color:var(--text);';
+        const textarea = document.createElement('textarea'); textarea.placeholder = placeholder;
+        textarea.style.cssText = 'width:100%;padding:12px;border-radius:10px;border:1px solid var(--border-light);background:var(--card);color:var(--text);font-family:inherit;font-size:0.9rem;outline:none;resize:vertical;min-height:80px;margin-bottom:20px;box-sizing:border-box;';
+        textarea.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); resolve(textarea.value); overlay.remove(); } });
+        const btnWrap = document.createElement('div'); btnWrap.style.cssText = 'display:flex;gap:10px;justify-content:flex-end;';
+        const cancelBtn = document.createElement('button'); cancelBtn.textContent = 'Cancel'; cancelBtn.style.cssText = 'padding:10px 18px;border-radius:8px;border:1px solid var(--border-light);background:var(--card);color:var(--text-muted);cursor:pointer;font-family:inherit;font-weight:700;transition:.2s;';
+        cancelBtn.onmouseover = () => cancelBtn.style.background = 'var(--card-hover)'; cancelBtn.onmouseout = () => cancelBtn.style.background = 'var(--card)'
+        cancelBtn.onclick = () => { resolve(null); overlay.remove(); };
+        const okBtn = document.createElement('button'); okBtn.textContent = 'Confirm'; okBtn.style.cssText = 'padding:10px 18px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;cursor:pointer;font-family:inherit;font-weight:700;transition:.2s;';
+        okBtn.onclick = () => { resolve(textarea.value); overlay.remove(); };
+        btnWrap.appendChild(cancelBtn); btnWrap.appendChild(okBtn);
+        box.appendChild(h3); box.appendChild(textarea); box.appendChild(btnWrap);
+        overlay.appendChild(box); document.body.appendChild(overlay);
+        setTimeout(() => textarea.focus(), 100);
+      });
+    }
+
+    function customConfirm(title, message) {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s ease forwards;';
+        overlay.onclick = (e) => { if (e.target === overlay) { resolve(false); overlay.remove(); } };
+        const box = document.createElement('div');
+        box.style.cssText = 'background:var(--surface-2);border:1px solid var(--border-light);border-radius:16px;padding:24px;width:calc(100% - 32px);max-width:400px;box-shadow:0 20px 50px rgba(0,0,0,.5);font-family:inherit;color:var(--text);text-align:center;';
+        const h3 = document.createElement('h3'); h3.textContent = title; h3.style.cssText = 'font-size:1.1rem;font-weight:800;margin-bottom:12px;color:var(--text);';
+        const p = document.createElement('p'); p.innerHTML = message; p.style.cssText = 'font-size:0.9rem;color:var(--text-muted);margin-bottom:24px;line-height:1.5;';
+        const btnWrap = document.createElement('div'); btnWrap.style.cssText = 'display:flex;gap:10px;justify-content:center;';
+        const cancelBtn = document.createElement('button'); cancelBtn.textContent = 'Cancel'; cancelBtn.style.cssText = 'padding:10px 18px;border-radius:8px;border:1px solid var(--border-light);background:var(--card);color:var(--text-muted);cursor:pointer;font-family:inherit;font-weight:700;transition:.2s;flex:1;';
+        cancelBtn.onmouseover = () => cancelBtn.style.background = 'var(--card-hover)'; cancelBtn.onmouseout = () => cancelBtn.style.background = 'var(--card)'
+        cancelBtn.onclick = () => { resolve(false); overlay.remove(); };
+        const confirmBtn = document.createElement('button'); confirmBtn.textContent = 'Confirm'; confirmBtn.style.cssText = 'padding:10px 18px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;cursor:pointer;font-family:inherit;font-weight:700;transition:.2s;flex:1;';
+        confirmBtn.onclick = () => { resolve(true); overlay.remove(); };
+        btnWrap.appendChild(cancelBtn); btnWrap.appendChild(confirmBtn);
+        box.appendChild(h3); box.appendChild(p); box.appendChild(btnWrap);
+        overlay.appendChild(box); document.body.appendChild(overlay);
+      });
+    }
+
+    function showScreen(screenId) { ['pendingScreen', 'suspendedScreen', 'rejectedScreen', 'notTesterScreen', 'testerPanel'].forEach(id => $(id).classList.add('hidden')); $(screenId).classList.remove('hidden'); }
+    document.querySelectorAll('.tab-btn').forEach(btn => { btn.onclick = () => { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden')); btn.classList.add('active'); $(`tab-${btn.dataset.tab}`).classList.remove('hidden'); }; });
+    
+    const editSelect = $('editRegionSelect'); const editTrigger = $('editRegionTrigger'); const editMenu = $('editRegionMenu'); const editInput = $('editRegionInput'); const editLabel = $('editRegionLabel');
+    editTrigger.onclick = (e) => { if (editSelect.classList.contains('disabled')) return; e.stopPropagation(); editMenu.classList.toggle('hidden'); };
+    document.addEventListener('click', () => editMenu.classList.add('hidden'));
+    editMenu.querySelectorAll('.custom-option').forEach(opt => { opt.onclick = (e) => { e.stopPropagation(); editInput.value = opt.dataset.value; editLabel.innerHTML = opt.querySelector('.region-badge').outerHTML; editMenu.classList.add('hidden'); }; });
+
+    $('editBio').oninput = (e) => { $('bioCounter').textContent = `${e.target.value.length}/250`; };
+
+    async function renderSearch(term) { 
+      const r = $('searchResults'); 
+      if (!term) { r.innerHTML = ''; return; } 
+      const names = await convex.query("admin:searchTesters", { term }); 
+      r.innerHTML = names.length ? names.map(name => `<div class="search-item" onclick="loadPlayerForEdit('${name.mc_name.replace(/'/g, "\\'")}')"><img src="https://mc-heads.net/avatar/${name.mc_name}/32" onerror="this.src='https://mc-heads.net/avatar/Steve/32'"><div class="search-item-info">${name.mc_name}</div><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>`).join('') : '<div style="color:var(--text-dim); padding: 12px; text-align:center; font-size:0.85rem;">No registered players found.</div>'; 
+    }
+    
+    window.loadPlayerForEdit = async (name) => {
+      currentEditName = name; $('searchPlayer').value = ''; $('searchResults').innerHTML = ''; $('editPanel').classList.remove('hidden'); $('editName').textContent = name; $('editAvatar').src = `https://mc-heads.net/avatar/${name}/64`; $('editNewPass').value = '';
+      
+      const testerData = await convex.query("admin:getTesterByName", { name });
+      if (testerData) {
+        currentEditUserId = testerData._id; currentEditIp = testerData.last_sign_in_ip || testerData.sign_up_ip || ''; 
+        $('editMcName').value = testerData.mc_name;
+        $('editBio').value = testerData.bio || ''; $('bioCounter').textContent = `${(testerData.bio || '').length}/250`;
+        const regVal = testerData.region || 'NA'; editInput.value = regVal; const matchedOpt = editMenu.querySelector(`.custom-option[data-value="${regVal}"]`); if (matchedOpt) editLabel.innerHTML = matchedOpt.querySelector('.region-badge').outerHTML; else editLabel.innerHTML = `<span class="region-badge empty">N/A</span>`;
+        
+        const isAdmin = isManagement(currentUser.role);
+        const isTargetSuperadmin = testerData.role === 'superadmin';
+        const canEditTarget = isAdmin && !(isTargetSuperadmin && currentUser.role !== 'superadmin');
+
+        if (canEditTarget) {
+          $('editBioGroup').classList.remove('hidden');
+          $('editProfileRow').classList.remove('hidden');
+          $('editPassGroup').classList.remove('hidden');
+          $('editDeleteGroup').classList.remove('hidden');
+          $('editDeleteDivider').classList.remove('hidden');
+          $('savePlayerBtn').textContent = 'Save All Changes';
+          
+          if (testerData.status === 'suspended') { $('suspendAccBtn').textContent = 'Unsuspend Account'; } else { $('suspendAccBtn').textContent = 'Suspend Account'; }
+        } else { 
+          $('editBioGroup').classList.add('hidden');
+          $('editProfileRow').classList.add('hidden');
+          $('editPassGroup').classList.add('hidden');
+          $('editDeleteGroup').classList.add('hidden');
+          $('editDeleteDivider').classList.add('hidden');
+          $('savePlayerBtn').textContent = 'Save Tiers';
+        }
+
+        $('altListLabel').classList.remove('hidden');
+        const detectedAlts = await convex.query("admin:getAltsByIp", { userId: currentEditUserId });
+        renderDetectedAlts(detectedAlts);
+      }
+      const data = await convex.query("admin:getPlayerTiers", { name }); 
+      renderGamemodeGrid(data || []); 
+      $('editPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    
+    function renderGamemodeGrid(playerRows = []) { 
+      $('gamemodeGrid').innerHTML = CATS.map(cat => { 
+        const row = playerRows.find(p => p.category === cat.key); 
+        const currentTier = row?.tier || ''; 
+        const options = ['<option value="">Unranked</option>'].concat(TIERS.map(t => `<option value="${t}" ${currentTier === t ? 'selected' : ''}>${t}</option>`)).join(''); 
+        const iconSrc = cat.key === 'pot' ? '/icon/pot.svg' : `/icon/${cat.key}.png`;
+        return `<div class="gamemode-item"><div class="gamemode-label"><img src="${iconSrc}" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';" alt="${cat.label}"><span style="display:none;">${cat.icon}</span>${cat.label}</div><select class="form-select" id="tier-${cat.key}">${options}</select></div>`; 
+      }).join(''); 
+    }
+    
+    $('savePlayerBtn').onclick = async () => {
+      if (!currentEditName || !currentEditUserId) return; const btn = $('savePlayerBtn'); btn.disabled = true; btn.textContent = 'Saving...';
+      const newMcName = $('editMcName').value.trim(); const newRegion = editInput.value; const newPass = $('editNewPass').value; const newBio = $('editBio').value.trim();
+      try {
+        const isAdmin = isManagement(currentUser.role);
+        
+        const tiers = [];
+        CATS.forEach(cat => { 
+          const tier = $(`tier-${cat.key}`).value; 
+          if (tier) tiers.push({ category: cat.key, tier });
+        });
+
+        await convex.mutation("admin:savePlayer", { 
+          token: currentToken, currentName: currentEditName, newMcName, region: newRegion, bio: newBio, tiers 
+        });
+
+        if (newPass && isAdmin) { 
+          await convex.mutation("admin:adminUpdatePassword", { token: currentToken, userId: currentEditUserId, password: newPass }); 
+        }
+        
+        toast(`${newMcName} updated successfully!`); currentEditName = newMcName; $('editName').textContent = newMcName; $('editAvatar').src = `https://mc-heads.net/avatar/${newMcName}/64`;
+      } catch (err) { toast(getErr(err), 'error'); } btn.disabled = false; btn.textContent = 'Save All Changes';
+    };
+    
+    $('suspendAccBtn').onclick = async () => {
+      if (!currentEditUserId) return; 
+      if (currentEditUserId === currentUser._id) return toast('You cannot suspend your own account!', 'error');
+      
+      const target = await convex.query("admin:getTesterByName", { name: currentEditName });
+      if (target.role === 'superadmin' && currentUser.role !== 'superadmin') return toast('Permission denied: You cannot suspend a Superadmin.', 'error');
+
+      if (target.status === 'suspended') { 
+        await convex.mutation("admin:unsuspend", { token: currentToken, userId: currentEditUserId });
+        toast('Account unsuspended.'); 
+        $('suspendAccBtn').textContent = 'Suspend Account'; 
+      } else { 
+        const result = await customSuspendModal("Suspend Account");
+        if (!result || !result.duration || !result.reason) return toast('Duration and reason are required.', 'error');
+        
+        const durationMs = parseDuration(result.duration);
+        if (!durationMs) return toast('Invalid duration format. Use 1h, 1d, 1w, 1m, 1y', 'error');
+        
+        await convex.mutation("admin:suspend", { 
+            token: currentToken, userId: currentEditUserId, durationMs, reason: result.reason
+        });
+        toast('Account suspended.', 'error'); 
+        $('suspendAccBtn').textContent = 'Unsuspend Account'; 
+      }
+      refreshAdminLists();
+    };
+    
+    $('banIpBtn').onclick = async () => { 
+      if (!currentEditIp) return toast('No IP found for this user.', 'error'); 
+      if (!await customConfirm('Ban IP Address', `Ban IP: ${currentEditIp}? This will block all accounts using this IP from logging in or registering.`)) return; 
+      try { 
+        await convex.mutation("admin:banIp", { token: currentToken, ip: currentEditIp, banned_by: currentUser._id }); 
+        toast(`IP ${currentEditIp} banned.`); loadBannedIps(); 
+      } catch (err) { toast(getErr(err), 'error'); } 
+    };
+    
+    $('deletePlayerAccountBtn').onclick = async () => {
+      if (!isManagement(currentUser.role)) { return toast('Only administrators can delete accounts.', 'error'); }
+      if (!currentEditUserId || !currentEditName) return; 
+      
+      const target = await convex.query("admin:getTesterByName", { name: currentEditName });
+      if (target.role === 'superadmin' && currentUser.role !== 'superadmin') return toast('Permission denied: You cannot delete a Superadmin.', 'error');
+
+      if (!await customConfirm('Delete Account', `Permanently delete account "${currentEditName}"? This cannot be undone.`)) return;
+      try { 
+        await convex.mutation("admin:deleteAccount", { token: currentToken, userId: currentEditUserId }); 
+        toast('Account fully deleted and removed from leaderboard.'); 
+        $('editPanel').classList.add('hidden'); refreshAdminLists(); 
+      } catch (err) { toast(getErr(err), 'error'); }
+    };
+    
+    function renderDetectedAlts(altsArray) { const list = $('altList'); if (!altsArray || altsArray.length === 0) { list.innerHTML = '<div style="color:var(--text-dim); padding: 10px; text-align:center; font-size:0.85rem;">No alt accounts detected.</div>'; return; } list.innerHTML = altsArray.map((alt) => `<div class="account-item" style="padding: 10px 12px;"><img src="https://mc-heads.net/avatar/${alt}/32" onerror="this.src='https://mc-heads.net/avatar/Steve/32'" style="width: 32px; height: 32px; border-radius: 6px; image-rendering: pixelated;"><div class="account-item-info" style="display: flex; align-items: center;"><div class="account-item-name" style="font-size: 0.9rem; margin: 0;">${alt}</div></div><button class="btn btn-secondary" style="padding: 6px 10px; font-size: 0.75rem;" onclick="loadPlayerForEdit('${alt.replace(/'/g, "\\'")}')">View Account</button></div>`).join(''); }
+    
+    async function loadSettings() { 
+      const data = await convex.query("auth:getSettings", {}); 
+      if (data) { $('toggleReg').checked = data.allow_registration; $('toggleApp').checked = data.allow_applications; $('toggleRejectedExp').value = data.rejected_expiration_days || 0; } 
+    }
+    $('toggleReg').onchange = async (e) => { 
+      try { await convex.mutation("admin:updateSettings", { token: currentToken, field: 'allow_registration', value: e.target.checked }); toast(e.target.checked ? 'Registration opened.' : 'Registration closed.'); } 
+      catch(err) { toast(getErr(err), 'error'); } 
+    };
+    $('toggleApp').onchange = async (e) => { 
+      try { await convex.mutation("admin:updateSettings", { token: currentToken, field: 'allow_applications', value: e.target.checked }); toast(e.target.checked ? 'Applications opened.' : 'Applications closed.'); } 
+      catch(err) { toast(getErr(err), 'error'); } 
+    };
+    $('toggleRejectedExp').onchange = async (e) => { 
+      const val = parseInt(e.target.value); 
+      try { await convex.mutation("admin:updateSettings", { token: currentToken, field: 'rejected_expiration_days', value: val }); 
+        const text = val === 1 ? '1 hour' : val === 24 ? '1 day' : val === 168 ? '7 days' : val === 336 ? '14 days' : val === 720 ? '30 days' : `${val} hours`; 
+        toast(val === 0 ? 'Auto-clear disabled.' : `Rejected apps will clear after ${text}.`); 
+        loadRejected($('searchRejected').value.trim()); 
+      } catch(err) { toast(getErr(err), 'error'); }
+    };
+    
+    function refreshAdminLists() { loadApplications($('searchPending').value.trim()); loadAccounts($('searchActive').value.trim()); loadRejected($('searchRejected').value.trim()); loadSuspended($('searchSuspended').value.trim()); loadBannedIps(); }
+    $('searchPending').oninput = (e) => { clearTimeout(pendingSearchDeb); pendingSearchDeb = setTimeout(() => loadApplications(e.target.value.trim()), 300); };
+    $('searchActive').oninput = (e) => { clearTimeout(activeSearchDeb); activeSearchDeb = setTimeout(() => loadAccounts(e.target.value.trim()), 300); };
+    $('searchRejected').oninput = (e) => { clearTimeout(rejectedSearchDeb); rejectedSearchDeb = setTimeout(() => loadRejected(e.target.value.trim()), 300); };
+    $('searchSuspended').oninput = (e) => { clearTimeout(suspendedSearchDeb); suspendedSearchDeb = setTimeout(() => loadSuspended(e.target.value.trim()), 300); };
+    
+    async function loadApplications(searchTerm = '') {
+      const data = await convex.query("admin:getPending", { searchTerm });
+      const list = $('applyList');
+      if (!data || data.length === 0) {
+        list.innerHTML = '<div style="color:var(--text-dim); padding: 10px; text-align:center; font-size:0.85rem;">No pending applications.</div>';
+        return;
+      }
+      list.innerHTML = data.map(acc => {
+        let answersHtml = '';
+        if (acc.app_answers) { answersHtml = `<div class="apply-answers"><div class="apply-answer-block"><div class="apply-answer-q">1. Why do you want to become a tester?</div><div class="apply-answer-a">${acc.app_answers.q1 || 'N/A'}</div></div><div class="apply-answer-block"><div class="apply-answer-q">2. Describe your Minecraft PvP experience</div><div class="apply-answer-a">${acc.app_answers.q2 || 'N/A'}</div></div><div class="apply-answer-block"><div class="apply-answer-q">3. How active are you?</div><div class="apply-answer-a">${acc.app_answers.q3 || 'N/A'}</div></div><div class="apply-answer-block"><div class="apply-answer-q">4. Past experience ranking/evaluating?</div><div class="apply-answer-a">${acc.app_answers.q4 || 'N/A'}</div></div></div>`; }
+        return `<div class="apply-item" style="flex-direction: column; align-items: stretch;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"><div class="apply-item-name">${acc.mc_name || acc.username} <span class="badge-role badge-pending">${SVG_ROLE_PENDING} Pending</span></div><div><button class="btn btn-success" style="padding: 8px 12px; font-size: 0.8rem;" onclick="approveApp('${acc._id}')">Approve</button><button class="btn btn-danger" style="padding: 8px 12px; font-size: 0.8rem;" onclick="rejectApp('${acc._id}')">Reject</button></div></div><div class="apply-item-meta">${acc.email} • ${acc.region || 'N/A'}</div>${answersHtml}</div>`;
+      }).join('');
+    }
+
+    window.rejectAllApps = async () => {
+      if (!await customConfirm('Reject All Pending', 'Are you sure you want to reject ALL pending applications? This cannot be undone.')) return;
+      const reason = await customPrompt("Enter reason for rejection", "This will be shown to all rejected users...");
+      if (reason === null) return; 
+      
+      const btn = $('rejectAllBtn');
+      btn.disabled = true;
+      btn.textContent = 'Rejecting...';
+      
+      try {
+        const count = await convex.mutation("admin:rejectAllApps", { token: currentToken, reason: reason || 'No reason provided.' });
+        toast(`Rejected ${count} applications.`);
+        loadApplications($('searchPending').value.trim()); 
+      } catch (err) {
+        toast(getErr(err), 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Reject All';
+      }
+    };
+    
+    async function loadAccounts(searchTerm = '') {
+      const data = await convex.query("admin:getActive", { searchTerm });
+      const list = $('accountList');
+      if (!data || data.length === 0) {
+        list.innerHTML = '<div style="color:var(--text-dim); padding: 10px; text-align:center; font-size:0.85rem;">No active accounts found.</div>';
+        return;
+      }
+      const canManage = canAssignRoles(currentUser.role);
+      list.innerHTML = data.map(acc => {
+        let actionsHtml = '';
+        if (acc._id === currentUser._id) {
+          actionsHtml = '<span style="color:var(--text-dim); font-size:0.8rem;">You</span>';
+        } else {
+          if (canManage && !(acc.role === 'superadmin' && currentUser.role !== 'superadmin')) {
+            let superadminOpt = (currentUser.role === 'superadmin') ? `<option value="superadmin" ${acc.role === 'superadmin' ? 'selected' : ''}>Superadmin</option>` : '';
+            actionsHtml += `<select class="form-select" style="width: auto; padding: 6px 10px; font-size: 0.8rem; height: 34px;" onchange="updateRole('${acc._id}', this.value)">
+              <option value="tester" ${acc.role === 'tester' || !acc.role ? 'selected' : ''}>Tester</option>
+              <option value="admin" ${acc.role === 'admin' ? 'selected' : ''}>Admin</option>
+              <option value="owner" ${acc.role === 'owner' ? 'selected' : ''}>Owner</option>
+              ${superadminOpt}
+            </select>`;
+          } else {
+            actionsHtml += getRoleBadge(acc.role || 'tester');
+          }
+          actionsHtml += `<button class="btn btn-warning" style="padding: 8px 12px; font-size: 0.8rem;" onclick="removeTester('${acc._id}', '${acc.username}')">Remove Tester</button>`;
+          actionsHtml += `<button class="btn btn-danger" style="padding: 8px 12px; font-size: 0.8rem;" onclick="deleteAccount('${acc._id}', '${acc.username}')">Delete</button>`;
+        }
+        return `<div class="account-item"><div class="account-item-info"><div class="account-item-name">${acc.mc_name || acc.username} ${getRoleBadge(acc.role || 'tester')}</div><div class="account-item-meta">${acc.email}</div></div><div class="account-actions">${actionsHtml}</div></div>`;
+      }).join('');
+    }
+
+    async function loadRejected(searchTerm = '') {
+      const data = await convex.query("admin:getRejected", { searchTerm });
+      const list = $('rejectedList');
+      if (!data || data.length === 0) {
+        list.innerHTML = '<div style="color:var(--text-dim); padding: 10px; text-align:center; font-size:0.85rem;">No rejected applications.</div>';
+        return;
+      }
+      list.innerHTML = data.map(acc => `<div class="account-item" style="flex-direction: column; align-items: stretch;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"><div class="account-item-info"><div class="account-item-name">${acc.mc_name || acc.username} <span class="badge-role badge-rejected">${SVG_ROLE_REJECTED} Rejected</span></div><div class="account-item-meta">${acc.email}</div></div><div class="account-actions"><button class="btn btn-success" style="padding: 8px 12px; font-size: 0.8rem;" onclick="approveApp('${acc._id}')">Approve</button><button class="btn btn-secondary" style="padding: 8px 12px; font-size: 0.8rem;" onclick="clearRejection('${acc._id}')">Clear Rejection</button></div></div>${acc.admin_message ? `<div style="background: var(--surface-2); padding: 10px 14px; border-radius: 8px; border-left: 3px solid var(--danger); font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;"><strong style="color: var(--text);">Reason:</strong> ${acc.admin_message}</div>` : ''}</div>`).join('');
+    }
+
+    async function loadSuspended(searchTerm = '') {
+      const data = await convex.query("admin:getSuspended", { searchTerm });
+      const list = $('suspendedList');
+      if (!data || data.length === 0) {
+        list.innerHTML = '<div style="color:var(--text-dim); padding: 10px; text-align:center; font-size:0.85rem;">No suspended accounts.</div>';
+        return;
+      }
+      list.innerHTML = data.map(acc => `<div class="account-item" style="flex-direction: column; align-items: stretch;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"><div class="account-item-info"><div class="account-item-name">${acc.mc_name || acc.username} <span class="badge-role badge-suspended">${SVG_ROLE_SUSPENDED} Suspended</span></div><div class="account-item-meta">${acc.email}</div></div><div class="account-actions"><button class="btn btn-success" style="padding: 8px 12px; font-size: 0.8rem;" onclick="unsuspendAccount('${acc._id}')">Unsuspend</button></div></div>${acc.admin_message ? `<div style="background: var(--surface-2); padding: 10px 14px; border-radius: 8px; border-left: 3px solid #c026d3; font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;"><strong style="color: var(--text);">Reason:</strong> ${acc.admin_message}</div>` : ''}</div>`).join('');
+    }
+
+    async function loadBannedIps() { 
+      const data = await convex.query("admin:getBannedIps", {}); 
+      const list = $('bannedIpsList'); 
+      if (!data || data.length === 0) { list.innerHTML = '<div style="color:var(--text-dim); padding: 10px; text-align:center; font-size:0.85rem;">No banned IPs.</div>'; return; } 
+      list.innerHTML = data.map(item => `<div class="account-item"><div class="account-item-info"><div class="account-item-name">${item.ip_address}</div><div class="account-item-meta">Banned: ${item.banned_at ? new Date(item.banned_at).toLocaleDateString() : 'N/A'}</div></div><div class="account-actions"><button class="btn btn-danger" style="padding: 8px 12px; font-size: 0.8rem;" onclick="unbanIp('${item.ip_address}')">Unban IP</button></div></div>`).join(''); 
+    }
+    
+    window.approveApp = async (userId) => { 
+      const msg = await customPrompt("Enter a welcome message", "Optional welcome message for the tester..."); 
+      if (msg === null) return; 
+      try { await convex.mutation("admin:approveApp", { token: currentToken, userId, msg }); toast(`Application approved! They can now log in.`); refreshAdminLists(); } 
+      catch(err) { toast(getErr(err), 'error'); } 
+    };
+    window.rejectApp = async (userId) => { 
+      const reason = await customPrompt("Enter the reason for rejection", "This will be shown to the user..."); 
+      if (reason === null) return; 
+      try { await convex.mutation("admin:rejectApp", { token: currentToken, userId, reason: reason || 'No reason provided.' }); toast('Application rejected.'); refreshAdminLists(); } 
+      catch(err) { toast(getErr(err), 'error'); } 
+    };
+    window.clearRejection = async (userId) => { 
+      if (!await customConfirm('Clear Rejection', 'Clear rejection? This will allow the user to apply again.')) return; 
+      try { await convex.mutation("admin:clearRejection", { token: currentToken, userId }); toast('Rejection cleared. User can apply again.'); refreshAdminLists(); } 
+      catch(err) { toast(getErr(err), 'error'); } 
+    };
+    window.unsuspendAccount = async (userId) => { 
+      const target = await convex.query("admin:getTesterByName", { name: currentEditName }); // simplified check
+      try { await convex.mutation("admin:unsuspend", { token: currentToken, userId }); toast('Account unsuspended.'); refreshAdminLists(); } 
+      catch(err) { toast(getErr(err), 'error'); } 
+    };
+    window.unbanIp = async (ip) => { 
+      if (!await customConfirm('Unban IP', `Unban IP: ${ip}?`)) return; 
+      try { await convex.mutation("admin:unbanIp", { token: currentToken, ip }); toast('IP unbanned.'); loadBannedIps(); } 
+      catch(err) { toast(getErr(err), 'error'); } 
+    };
+    
+    window.updateRole = async (userId, newRole) => { 
+      try { await convex.mutation("admin:updateRole", { token: currentToken, userId, role: newRole }); toast(`User role updated to ${newRole}!`); loadAccounts($('searchActive').value.trim()); } 
+      catch(err) { toast(getErr(err), 'error'); } 
+    };
+
+    window.removeTester = async (userId, username) => { 
+      if (!await customConfirm('Remove Tester', `Remove ${username} as a tester? They will be demoted to a regular player but keep their account and ranks.`)) return; 
+      try { 
+        await convex.mutation("admin:removeTester", { token: currentToken, userId }); 
+        toast(`${username} has been removed as a tester.`); refreshAdminLists(); 
+      } catch (err) { toast(getErr(err), 'error'); } 
+    };
+
+    window.deleteAccount = async (userId, username) => { 
+      if (!await customConfirm('Delete Account', `Delete account "${username}"?<br>This will permanently delete their login, profile, and leaderboard ranks.`)) return; 
+      try { 
+        await convex.mutation("admin:deleteAccount", { token: currentToken, userId }); 
+        toast('Account fully deleted.'); refreshAdminLists(); 
+      } catch (err) { toast(getErr(err), 'error'); } 
+    };
+
+    function showPanel() { 
+      showScreen('testerPanel'); 
+      $('logoutBtn').classList.remove('hidden'); 
+      $('currentUser').textContent = currentUser.display_name || currentUser.username; 
+      if (isManagement(currentUser.role)) { 
+        $('adminTabBtn').classList.remove('hidden'); 
+        loadSettings(); 
+        refreshAdminLists(); 
+      } else { 
+        $('adminTabBtn').classList.add('hidden'); 
+      } 
+    }
+
+    async function handleLogout() { localStorage.removeItem('auth_token'); window.location.href = '/login'; }
+    async function init() {
+      try {
+        const token = localStorage.getItem('auth_token');
+        if (!token) { window.location.href = '/login'; return; }
+        currentToken = token;
+        
+        const profile = await convex.query("auth:getCurrentUser", { token });
+        if (!profile) { localStorage.removeItem('auth_token'); window.location.href = '/login'; return; }
+        currentUser = profile;
+        
+        if (profile.status === 'pending') { showScreen('pendingScreen'); }
+        else if (profile.status === 'suspended') { 
+          showScreen('suspendedScreen'); 
+          $('suspendedDesc').innerHTML = profile.admin_message ? `Reason: <span style="color: var(--text); font-weight: 600;">${profile.admin_message}</span>` : 'Your account has been suspended by an administrator.'; 
+        }
+        else if (profile.status === 'rejected') {
+          showScreen('rejectedScreen');
+          $('rejectedDesc').innerHTML = profile.admin_message ? `Reason: <span style="color: var(--text); font-weight: 600;">${profile.admin_message}</span>` : 'Your application to become a tester was rejected.';
+        }
+        else if (profile.status === 'approved') { showPanel(); }
+        else { showScreen('notTesterScreen'); }
+        
+        $('logoutBtn').onclick = handleLogout; $('logoutBtn2').onclick = handleLogout; $('logoutBtn4').onclick = handleLogout;
+        $('searchPlayer').oninput = (e) => { clearTimeout(searchDebounce); searchDebounce = setTimeout(() => renderSearch(e.target.value.trim()), 300); };
+      } catch (err) {
+        console.error('❌ Initialization Error:', err);
+        document.body.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; text-align:center; padding:20px; font-family: sans-serif; color: #ef4444;"><h1 style="font-size: 2rem; margin-bottom: 10px;">Connection Error</h1><p style="color: #7a869e; max-width: 500px; margin-bottom: 20px;">${err.message || 'Unknown error'}</p><button onclick="window.location.href='/login'" style="margin-top: 20px; padding: 10px 20px; background: #8b5cf6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">Back to Login</button></div>`;
+      }
+    }
+    init();
+  </script>
+</body>
+</html>

@@ -10,12 +10,16 @@ export const getUserByEmail = query({
   },
 });
 
-// FIX: Made case-insensitive so users can log in regardless of capital letters
+// FIX: Checks both username AND mc_name, and is completely case-insensitive
 export const getUserByUsername = query({
   args: { username: v.string() },
   handler: async (ctx, args) => {
     const testers = await ctx.db.query("testers").collect();
-    return testers.find(t => (t.username || "").toLowerCase() === args.username.toLowerCase());
+    const searchTerm = args.username.toLowerCase();
+    return testers.find(t => 
+      (t.username || "").toLowerCase() === searchTerm || 
+      (t.mc_name || "").toLowerCase() === searchTerm
+    );
   },
 });
 

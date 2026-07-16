@@ -282,7 +282,8 @@
         currentToken = token;
         let btns = '';
         if (isViewingOther) {
-          btns += `<a href="/profile?id=${currentUser._id}" class="cta-btn-sm secondary">My Profile</a>`;
+          // FIX: Changed to /profile so it doesn't crash if currentUser is null
+          btns += `<a href="/profile" class="cta-btn-sm secondary">My Profile</a>`;
         } else {
           if (profile.role === 'admin' || profile.role === 'owner' || profile.role === 'superadmin') { 
             btns += `<a href="/tester" class="cta-btn-sm">${SVG_ADMIN} Admin Panel</a>`; 
@@ -398,7 +399,6 @@
 
       await renderStats(currentProfileMcName);
 
-      // FIX: Removed .catch() to prevent JavaScript crash that blocked the Settings button
       convex.onUpdate("profile:getProfileStats", { mc_name: currentProfileMcName }, (data) => {
         if (data) renderStats(currentProfileMcName);
       });

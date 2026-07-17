@@ -176,7 +176,10 @@
     const CATS = [{ key: 'sword', label: 'Sword', icon: '⚔️' },{ key: 'axe', label: 'Axe', icon: '🪓' },{ key: 'crystal', label: 'Crystal', icon: '💎' },{ key: 'nethpot', label: 'Nethpot', icon: '🧪' },{ key: 'pot', label: 'Pot', icon: '🍯' },{ key: 'uhc', label: 'UHC', icon: '❤️' },{ key: 'smp', label: 'SMP', icon: '🏠' },{ key: 'mace', label: 'Mace', icon: '🔨' }];
     const POINTS = { HT1:60,LT1:45,HT2:30,LT2:20,HT3:10,LT3:6,HT4:4,LT4:3,HT5:2,LT5:1 };
     const TITLES = [{ min:400, name:'Combat Grandmaster', color:'#eab308', icon:'/icon/combat_grandmaster.webp' },{ min:250, name:'Combat Master', color:'#eab308', icon:'/icon/combat_master.webp' },{ min:100, name:'Combat Ace', color:'#b91c1c', icon:'/icon/combat_ace.svg' },{ min:50, name:'Combat Specialist', color:'#3b82f6', icon:'/icon/combat_specialist.svg' },{ min:20, name:'Combat Cadet', color:'#06b6d4', icon:'/icon/combat_cadet.svg' },{ min:10, name:'Combat Novice', color:'#1e40af', icon:'/icon/combat_novice.svg' },{ min:1, name:'Rookie', color:'#a1a1aa', icon:'/icon/rookie.svg' }];
-    let currentUser = null; let isViewingOther = false; let currentProfileMcName = ''; let currentToken = null;
+    let currentUser = null; let isViewingOther = false; let currentProfileMcName = ''; 
+    // FIX: Explicitly read token immediately to ensure it is NEVER null
+    let currentToken = localStorage.getItem('auth_token') || null;
+    
     const $ = id => document.getElementById(id);
     const getErr = (err) => { if (!err) return 'Unknown error'; if (typeof err === 'string') return err; if (err.message) return err.message; try { return JSON.stringify(err); } catch (e) { return 'Unknown error object'; } };
     const toast = (msg, type = 'success') => { const t = $('toast'); t.textContent = msg; t.className = `toast ${type} show`; setTimeout(() => t.classList.remove('show'), 3500); };
@@ -251,7 +254,9 @@
     }
 
     async function init() {
+      // FIX: Read token immediately so it is guaranteed to be set
       const token = localStorage.getItem('auth_token');
+      currentToken = token;
       const authBtnContainer = $('authButtons');
       
       const urlParams = new URLSearchParams(window.location.search); 
@@ -281,6 +286,8 @@
           if (currentUser) { $('backToMyProfileBtn').classList.remove('hidden'); } 
         } else { 
           currentUser = profile; 
+          // FIX: Ensure currentToken is set even if visiting own profile via ?id=
+          currentToken = localStorage.getItem('auth_token');
         } 
       }
 
@@ -509,6 +516,7 @@
       if (newPass.length < 6) return toast('New password must be at least 6 chars', 'error'); 
       const btn = $('changePassBtn'); btn.disabled = true; btn.textContent = 'Verifying...'; 
       try { 
+        // FIX: Point to authActions:changePassword
         await convex.action("authActions:changePassword", { token: currentToken, currentPass, newPass }); 
         toast('Password updated successfully!'); 
         $('currentPass').value = ''; $('newPass').value = ''; 

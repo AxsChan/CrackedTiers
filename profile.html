@@ -383,7 +383,6 @@
         const uuidContainer = $('profileUuidContainer'); const uuidText = $('profileUuidText'); uuidText.textContent = profile._id; uuidContainer.classList.remove('hidden');
         uuidContainer.onclick = () => { const linkToCopy = `${window.location.origin}/profile?id=${profile._id}`; navigator.clipboard.writeText(linkToCopy).then(() => { toast('Profile link copied to clipboard!'); }).catch(() => { toast('Failed to copy link', 'error'); }); };
 
-        // Discord Connection Logic
         if (profile.discord_id && profile.discord_username) {
           $('discordUsernameDisplay').textContent = `@${profile.discord_username}`;
           $('discordConnected').classList.remove('hidden');
@@ -510,7 +509,7 @@
       if (newPass.length < 6) return toast('New password must be at least 6 chars', 'error'); 
       const btn = $('changePassBtn'); btn.disabled = true; btn.textContent = 'Verifying...'; 
       try { 
-        await convex.action("profileActions:changePassword", { token: currentToken, currentPass, newPass }); 
+        await convex.action("authActions:changePassword", { token: currentToken, currentPass, newPass }); 
         toast('Password updated successfully!'); 
         $('currentPass').value = ''; $('newPass').value = ''; 
       } catch (err) { toast(getErr(err), 'error'); } 

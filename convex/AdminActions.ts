@@ -90,3 +90,39 @@ export const register = action({
     return { token: sessionToken, user_id: userId };
   },
 });
+
+// ==========================================
+// ADMIN UPDATE PASSWORD ACTION
+// (For Admins to reset a user's password in the Tester Panel)
+// ==========================================
+export const adminUpdatePassword = action({
+  args: { token: v.string(), userId: v.id("testers"), password: v.string() },
+  handler: async (ctx, args) => {
+    const hash = bcrypt.hashSync(args.password, 10);
+    await ctx.runMutation("admin:internalUpdatePassword", { 
+      token: args.token, 
+      userId: args.userId, 
+      hash: hash 
+    });
+    return true;
+  }
+});
+
+// ==========================================
+// PROFILE CHANGE PASSWORD ACTION
+// (For users to change their own password in the Profile Settings)
+// ==========================================
+export const changePassword = action({
+  args: { token: v.string(), currentPass: v.string(), newPass: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.runQuery("profile:getUserForPasswordChange", { token: args.token });
+    if (!user || !user.password_hash) throw new Error("User not found.");
+    
+    const isMatch = bcrypt.compareSync(args.currentPass, user.password_hash);
+    if (!isMatch) throw new Error("Current password is incorrect");
+    
+    const hash = bcrypt.hashSync(args.newPass, 10);
+    await ctx.runMutation("profile:internalUpdatePassword", { userId: user._id, hash: hash });
+    return true;
+  }
+});

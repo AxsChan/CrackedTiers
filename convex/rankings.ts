@@ -1,7 +1,6 @@
 import { query } from "./_generated/server";
 import { v } from "convex/values";
 
-// Used by index.html to load the leaderboard
 export const getRankingsData = query({
   args: {},
   handler: async (ctx) => {
@@ -27,7 +26,6 @@ export const getRankingsData = query({
   },
 });
 
-// Used by index.html modal to get the profile link
 export const getTesterByMcName = query({
   args: { mc_name: v.string() },
   handler: async (ctx, args) => {
@@ -38,7 +36,6 @@ export const getTesterByMcName = query({
   },
 });
 
-// Used by home.html to display the staff team
 export const getStaff = query({
   args: {},
   handler: async (ctx) => {

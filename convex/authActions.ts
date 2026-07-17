@@ -10,7 +10,6 @@ import crypto from "crypto";
 export const login = action({
   args: { loginInput: v.string(), password: v.string(), captchaToken: v.string() },
   handler: async (ctx, args) => {
-    // 1. Verify Captcha
     const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -22,7 +21,6 @@ export const login = action({
     const verifyData = await verifyRes.json();
     if (!verifyData.success) throw new Error("Captcha verification failed.");
 
-    // 2. Find User
     let user = null;
     if (args.loginInput.includes('@')) {
       user = await ctx.runQuery("auth:getUserByEmail", { email: args.loginInput });
@@ -32,14 +30,12 @@ export const login = action({
 
     if (!user) throw new Error("User not found. Check your spelling.");
 
-    // 3. Check Password Hash
     const passHash = user.password_hash || user.encrypted_password;
     if (!passHash) throw new Error("User found, but no password is set in the database.");
 
     const isMatch = bcrypt.compareSync(args.password, passHash);
     if (!isMatch) throw new Error("Password is incorrect.");
 
-    // 4. Create Session
     const sessionToken = crypto.randomBytes(32).toString("hex");
     await ctx.runMutation("auth:saveSessionToken", { userId: user._id, token: sessionToken });
 
@@ -89,4 +85,38 @@ export const register = action({
 
     return { token: sessionToken, user_id: userId };
   },
+});
+
+// ==========================================
+// ADMIN UPDATE PASSWORD ACTION
+// ==========================================
+export const adminUpdatePassword = action({
+  args: { token: v.string(), userId: v.id("testers"), password: v.string() },
+  handler: async (ctx, args) => {
+    const hash = bcrypt.hashSync(args.password, 10);
+    await ctx.runMutation("admin:internalUpdatePassword", { 
+      token: args.token, 
+      userId: args.userId, 
+      hash: hash 
+    });
+    return true;
+  }
+});
+
+// ==========================================
+// PROFILE CHANGE PASSWORD ACTION
+// ==========================================
+export const changePassword = action({
+  args: { token: v.string(), currentPass: v.string(), newPass: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.runQuery("profile:getUserForPasswordChange", { token: args.token });
+    if (!user || !user.password_hash) throw new Error("User not found.");
+    
+    const isMatch = bcrypt.compareSync(args.currentPass, user.password_hash);
+    if (!isMatch) throw new Error("Current password is incorrect");
+    
+    const hash = bcrypt.hashSync(args.newPass, 10);
+    await ctx.runMutation("profile:internalUpdatePassword", { userId: user._id, hash: hash });
+    return true;
+  }
 });

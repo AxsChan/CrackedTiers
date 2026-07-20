@@ -13,7 +13,7 @@ const CONFIG = {
   
   // 3. Discord Config
   discord: {
-    url: 'https://dc.mazerclub.net', 
+    url: 'https://discord.gg/RQcJjxctYr', 
     links: [
       { key: 'burberrysmp', label: 'BurberrySMP', icon: 'icon/berry.png', url: 'https://discord.burberry.cc.cd' },
       { key: 'crackedtiers', label: 'CrackedTiers', icon: 'icon/website.png', url: 'https://discord.gg/bBrQ3b5AzQ' }

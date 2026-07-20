@@ -346,14 +346,14 @@
     async function renderSearch(term) { 
       const r = $('searchResults'); 
       if (!term) { r.innerHTML = ''; return; } 
-      const names = await convex.query("admin:searchTesters", { term }); 
+      const names = await convex.query("admin:searchTesters", { token: currentToken, term }); 
       r.innerHTML = names.length ? names.map(name => `<div class="search-item" onclick="loadPlayerForEdit('${name.mc_name.replace(/'/g, "\\'")}')"><img src="${bust128(name.mc_name)}" data-skin="${name.mc_name}" data-fi="0" data-small="1" onerror="this.style.display='none'"><div class="search-item-info">${name.mc_name}</div><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>`).join('') : '<div style="color:var(--text-dim); padding: 12px; text-align:center; font-size:0.85rem;">No registered players found.</div>'; 
     }
     
     window.loadPlayerForEdit = async (name) => {
       currentEditName = name; $('searchPlayer').value = ''; $('searchResults').innerHTML = ''; $('editPanel').classList.remove('hidden'); $('editName').textContent = name; $('editAvatar').src = bust128(name); $('editAvatar').dataset.skin = name; $('editNewPass').value = '';
       
-      const testerData = await convex.query("admin:getTesterByName", { name });
+      const testerData = await convex.query("admin:getTesterByName", { token: currentToken, name });
       if (testerData) {
         currentEditUserId = testerData._id; currentEditIp = testerData.last_sign_in_ip || testerData.sign_up_ip || ''; 
         $('editMcName').value = testerData.mc_name;
@@ -383,10 +383,10 @@
         }
 
         $('altListLabel').classList.remove('hidden');
-        const detectedAlts = await convex.query("admin:getAltsByIp", { userId: currentEditUserId });
+        const detectedAlts = await convex.query("admin:getAltsByIp", { token: currentToken, userId: currentEditUserId });
         renderDetectedAlts(detectedAlts);
       }
-      const data = await convex.query("admin:getPlayerTiers", { name }); 
+      const data = await convex.query("admin:getPlayerTiers", { token: currentToken, name }); 
       renderGamemodeGrid(data || []); 
       $('editPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
@@ -430,7 +430,7 @@
       if (!currentEditUserId) return; 
       if (currentEditUserId === currentUser._id) return toast('You cannot suspend your own account!', 'error');
       
-      const target = await convex.query("admin:getTesterByName", { name: currentEditName });
+      const target = await convex.query("admin:getTesterByName", { token: currentToken, name: currentEditName });
       if (target.role === 'superadmin' && currentUser.role !== 'superadmin') return toast('Permission denied: You cannot suspend a Superadmin.', 'error');
 
       if (target.status === 'suspended') { 
@@ -466,7 +466,7 @@
       if (!isManagement(currentUser.role)) { return toast('Only administrators can delete accounts.', 'error'); }
       if (!currentEditUserId || !currentEditName) return; 
       
-      const target = await convex.query("admin:getTesterByName", { name: currentEditName });
+      const target = await convex.query("admin:getTesterByName", { token: currentToken, name: currentEditName });
       if (target.role === 'superadmin' && currentUser.role !== 'superadmin') return toast('Permission denied: You cannot delete a Superadmin.', 'error');
 
       if (!await customConfirm('Delete Account', `Permanently delete account "${currentEditName}"? This cannot be undone.`)) return;
@@ -507,7 +507,7 @@
     $('searchSuspended').oninput = (e) => { clearTimeout(suspendedSearchDeb); suspendedSearchDeb = setTimeout(() => loadSuspended(e.target.value.trim()), 300); };
     
     async function loadApplications(searchTerm = '') {
-      const data = await convex.query("admin:getPending", { searchTerm });
+      const data = await convex.query("admin:getPending", { token: currentToken, searchTerm });
       const list = $('applyList');
       if (!data || data.length === 0) {
         list.innerHTML = '<div style="color:var(--text-dim); padding: 10px; text-align:center; font-size:0.85rem;">No pending applications.</div>';
@@ -542,7 +542,7 @@
     };
     
     async function loadAccounts(searchTerm = '') {
-      const data = await convex.query("admin:getActive", { searchTerm });
+      const data = await convex.query("admin:getActive", { token: currentToken, searchTerm });
       const list = $('accountList');
       if (!data || data.length === 0) {
         list.innerHTML = '<div style="color:var(--text-dim); padding: 10px; text-align:center; font-size:0.85rem;">No active accounts found.</div>';
@@ -573,7 +573,7 @@
     }
 
     async function loadRejected(searchTerm = '') {
-      const data = await convex.query("admin:getRejected", { searchTerm });
+      const data = await convex.query("admin:getRejected", { token: currentToken, searchTerm });
       const list = $('rejectedList');
       if (!data || data.length === 0) {
         list.innerHTML = '<div style="color:var(--text-dim); padding: 10px; text-align:center; font-size:0.85rem;">No rejected applications.</div>';
@@ -583,7 +583,7 @@
     }
 
     async function loadSuspended(searchTerm = '') {
-      const data = await convex.query("admin:getSuspended", { searchTerm });
+      const data = await convex.query("admin:getSuspended", { token: currentToken, searchTerm });
       const list = $('suspendedList');
       if (!data || data.length === 0) {
         list.innerHTML = '<div style="color:var(--text-dim); padding: 10px; text-align:center; font-size:0.85rem;">No suspended accounts.</div>';
@@ -593,7 +593,7 @@
     }
 
     async function loadBannedIps() { 
-      const data = await convex.query("admin:getBannedIps", {}); 
+      const data = await convex.query("admin:getBannedIps", { token: currentToken }); 
       const list = $('bannedIpsList'); 
       if (!data || data.length === 0) { list.innerHTML = '<div style="color:var(--text-dim); padding: 10px; text-align:center; font-size:0.85rem;">No banned IPs.</div>'; return; } 
       list.innerHTML = data.map(item => `<div class="account-item"><div class="account-item-info"><div class="account-item-name">${item.ip_address}</div><div class="account-item-meta">Banned: ${item.banned_at ? new Date(item.banned_at).toLocaleDateString() : 'N/A'}</div></div><div class="account-actions"><button class="btn btn-danger" style="padding: 8px 12px; font-size: 0.8rem;" onclick="unbanIp('${item.ip_address}')">Unban IP</button></div></div>`).join(''); 
@@ -706,4 +706,4 @@
     init();
   </script>
 </body>
-</html>
+  </html>

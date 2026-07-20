@@ -33,4 +33,3 @@ const CONFIG = {
 
 // Expose to window
 window.CONFIG = CONFIG;
-console.log('✅ config.js loaded:', CONFIG);

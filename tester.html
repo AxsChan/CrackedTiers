@@ -5,11 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CDTIERS | Tester Panel</title>
   <link rel="icon" type="image/png" href="/icon/website.png" /> 
-  
-  <!-- OPTIMIZATION: Preconnect to Convex -->
   <link rel="preconnect" href="https://canny-bird-190.convex.cloud">
   <link rel="dns-prefetch" href="https://canny-bird-190.convex.cloud">
-
   <link rel="preconnect" href="https://fonts.googleapis.com"> 
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -35,7 +32,18 @@
     .region-badge { display:inline-flex; align-items:center; justify-content:center; padding:6px 12px; border-radius:7px; font-size:.75rem; font-weight:900; letter-spacing:.04em; color:#fff; min-width:44px; text-align:center; line-height:1; text-shadow:0 1px 2px rgba(0,0,0,.35); box-shadow:inset 0 -2px 0 rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.08); } .region-badge.na { background:#1d4ed8; } .region-badge.eu { background:#15803d; } .region-badge.as, .region-badge.asia { background:#7c3aed; } .region-badge.sa { background:#ea580c; } .region-badge.oce, .region-badge.au { background:#0891b2; } .region-badge.empty { background:transparent; border:1px dashed var(--border-light); color:var(--text-dim); font-weight:700; box-shadow:none; text-shadow:none; }
     .custom-select { position: relative; width: 100%; } .custom-select-trigger { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border-light); background: var(--card); color: var(--text); font-family: inherit; font-size: 0.9rem; cursor: pointer; transition: 0.2s; text-align: left; } .custom-select-trigger:hover { border-color: var(--accent); } .custom-select-menu { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 10; background: var(--surface-2); border: 1px solid var(--border-light); border-radius: 10px; padding: 6px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); max-height: 250px; overflow-y: auto; } .custom-option { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; transition: background 0.15s; font-size: 0.9rem; color: var(--text); } .custom-option:hover { background: var(--card-hover); }
     .divider { height: 1px; background: var(--border); margin: 24px 0; } .toast { position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; font-weight: 600; transform: translateY(100px); opacity: 0; transition: 0.3s; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-width: 90vw; } .toast.show { transform: translateY(0); opacity: 1; } .toast.success { background: var(--success); color: #fff; } .toast.error { background: var(--danger); color: #fff; } .hidden { display: none !important; }
-    @media (max-width: 768px) { .nav-center { display: none; } .form-row { grid-template-columns: 1fr; } .tester-info { flex-direction: column; gap: 10px; text-align: center; } .account-item, .apply-item { flex-wrap: wrap; } .account-item-info, .apply-item-info { width: 100%; order: -1; } .tabs { flex-direction: column; } }
+    
+    /* Admin Dashboard Grid */
+    .dash-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+    .dash-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+    .dash-card .dash-num { font-size: 1.8rem; font-weight: 900; }
+    .dash-card .dash-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
+    .dash-card.pending { border-color: rgba(245, 158, 11, 0.3); } .dash-card.pending .dash-num { color: var(--warning); }
+    .dash-card.active { border-color: rgba(34, 197, 94, 0.3); } .dash-card.active .dash-num { color: var(--success); }
+    .dash-card.suspended { border-color: rgba(107, 33, 168, 0.3); } .dash-card.suspended .dash-num { color: #c026d3; }
+    .dash-card.rejected { border-color: rgba(239, 68, 68, 0.3); } .dash-card.rejected .dash-num { color: var(--danger); }
+
+    @media (max-width: 768px) { .nav-center { display: none; } .form-row { grid-template-columns: 1fr; } .tester-info { flex-direction: column; gap: 10px; text-align: center; } .account-item, .apply-item { flex-wrap: wrap; } .account-item-info, .apply-item-info { width: 100%; order: -1; } .tabs { flex-direction: column; } .dash-grid { grid-template-columns: repeat(2, 1fr); } }
   </style>
 </head>
 <body>
@@ -153,6 +161,13 @@
       </div>
       
       <div id="tab-admin" class="tab-content hidden">
+        <div class="dash-grid">
+          <div class="dash-card pending"><div class="dash-num" id="statPending">0</div><div class="dash-label">Pending</div></div>
+          <div class="dash-card active"><div class="dash-num" id="statActive">0</div><div class="dash-label">Active</div></div>
+          <div class="dash-card suspended"><div class="dash-num" id="statSuspended">0</div><div class="dash-label">Suspended</div></div>
+          <div class="dash-card rejected"><div class="dash-num" id="statRejected">0</div><div class="dash-label">Rejected</div></div>
+        </div>
+
         <div class="card">
           <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> <span>Site Settings</span></div>
           <div class="toggle-switch"><div><div style="font-weight: 700; font-size: 0.95rem;">Allow User Registration</div><div style="font-size: 0.8rem; color: var(--text-muted);">Close registration to stop new accounts from being created.</div></div><label class="switch"><input type="checkbox" id="toggleReg" checked><span class="slider"></span></label></div>
@@ -163,6 +178,7 @@
           <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span>Pending Applications</span></div>
           <div style="display: flex; gap: 10px; margin-bottom: 15px;">
             <input type="text" id="searchPending" class="form-input" placeholder="Search pending by name or email..." style="margin-bottom: 0;">
+            <button id="approveAllBtn" class="btn btn-success" style="width: auto; padding: 12px 16px; white-space: nowrap;" onclick="approveAllApps()">Approve All</button>
             <button id="rejectAllBtn" class="btn btn-danger" style="width: auto; padding: 12px 16px; white-space: nowrap;" onclick="rejectAllApps()">Reject All</button>
           </div>
           <div id="applyList" class="apply-list"></div>
@@ -316,7 +332,6 @@
 
     $('editBio').oninput = (e) => { $('bioCounter').textContent = `${e.target.value.length}/250`; };
 
-    // EXACT LOGIC FROM INDEX.HTML: Generate Offline UUID for Cracked Accounts
     function genUUID(name) {
         if (!name) return '8667ba71b112a42fa9b48fe323f510e5';
         let h = 0;
@@ -329,7 +344,6 @@
             Math.floor(r(4) * 0xffffffffffff).toString(16).padStart(12, '0');
     }
 
-    // EXACT LOGIC FROM INDEX.HTML: Avatar Fallbacks
     const avatarFallbacks=(name,sm)=>{
         const u=genUUID(name),sz=sm?128:512;
         return[`https://visage.surgeplay.com/bust/${sz}/${u}`,`https://crafatar.com/renders/body/${u}?scale=${sm?6:10}&overlay=true`,`https://mc-heads.net/bust/${encodeURIComponent(name)}/${sm?80:100}`,`https://minotar.net/bust/${encodeURIComponent(name)}/${sm?80:100}`,`https://visage.surgeplay.com/bust/${sz}/8667ba71b112a42fa9b48fe323f510e5`];
@@ -346,8 +360,12 @@
     async function renderSearch(term) { 
       const r = $('searchResults'); 
       if (!term) { r.innerHTML = ''; return; } 
-      const names = await convex.query("admin:searchTesters", { token: currentToken, term }); 
-      r.innerHTML = names.length ? names.map(name => `<div class="search-item" onclick="loadPlayerForEdit('${name.mc_name.replace(/'/g, "\\'")}')"><img src="${bust128(name.mc_name)}" data-skin="${name.mc_name}" data-fi="0" data-small="1" onerror="this.style.display='none'"><div class="search-item-info">${name.mc_name}</div><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>`).join('') : '<div style="color:var(--text-dim); padding: 12px; text-align:center; font-size:0.85rem;">No registered players found.</div>'; 
+      try {
+        const names = await convex.query("admin:searchTesters", { token: currentToken, term }); 
+        r.innerHTML = names.length ? names.map(name => `<div class="search-item" onclick="loadPlayerForEdit('${name.mc_name.replace(/'/g, "\\'")}')"><img src="${bust128(name.mc_name)}" data-skin="${name.mc_name}" data-fi="0" data-small="1" onerror="this.style.display='none'"><div class="search-item-info">${name.mc_name}</div><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>`).join('') : '<div style="color:var(--text-dim); padding: 12px; text-align:center; font-size:0.85rem;">No registered players found.</div>'; 
+      } catch (err) {
+        r.innerHTML = `<div style="color:var(--danger); padding: 12px; text-align:center; font-size:0.85rem;">Error: ${getErr(err)}</div>`;
+      }
     }
     
     window.loadPlayerForEdit = async (name) => {
@@ -417,7 +435,6 @@
           token: currentToken, currentName: currentEditName, newMcName, region: newRegion, bio: newBio, tiers 
         });
 
-        // FIX: Point to authActions:adminUpdatePassword to recover lost accounts
         if (newPass && isAdmin) { 
           await convex.action("authActions:adminUpdatePassword", { token: currentToken, userId: currentEditUserId, password: newPass }); 
         }
@@ -508,6 +525,7 @@
     
     async function loadApplications(searchTerm = '') {
       const data = await convex.query("admin:getPending", { token: currentToken, searchTerm });
+      $('statPending').textContent = data.length;
       const list = $('applyList');
       if (!data || data.length === 0) {
         list.innerHTML = '<div style="color:var(--text-dim); padding: 10px; text-align:center; font-size:0.85rem;">No pending applications.</div>';
@@ -519,6 +537,26 @@
         return `<div class="apply-item" style="flex-direction: column; align-items: stretch;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"><div class="apply-item-name">${acc.mc_name || acc.username} <span class="badge-role badge-pending">${SVG_ROLE_PENDING} Pending</span></div><div><button class="btn btn-success" style="padding: 8px 12px; font-size: 0.8rem;" onclick="approveApp('${acc._id}')">Approve</button><button class="btn btn-danger" style="padding: 8px 12px; font-size: 0.8rem;" onclick="rejectApp('${acc._id}')">Reject</button></div></div><div class="apply-item-meta">${acc.email} • ${acc.region || 'N/A'}</div>${answersHtml}</div>`;
       }).join('');
     }
+
+    window.approveAllApps = async () => {
+      if (!await customConfirm('Approve All Pending', 'Are you sure you want to approve ALL pending applications?')) return;
+      const btn = $('approveAllBtn');
+      btn.disabled = true;
+      btn.textContent = 'Approving...';
+      try {
+        const pending = await convex.query("admin:getPending", { token: currentToken, searchTerm: '' });
+        for (const p of pending) {
+          await convex.mutation("admin:approveApp", { token: currentToken, userId: p._id, msg: 'Your application has been approved!' });
+        }
+        toast(`Approved ${pending.length} applications.`);
+        refreshAdminLists(); 
+      } catch (err) {
+        toast(getErr(err), 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Approve All';
+      }
+    };
 
     window.rejectAllApps = async () => {
       if (!await customConfirm('Reject All Pending', 'Are you sure you want to reject ALL pending applications? This cannot be undone.')) return;
@@ -543,6 +581,7 @@
     
     async function loadAccounts(searchTerm = '') {
       const data = await convex.query("admin:getActive", { token: currentToken, searchTerm });
+      $('statActive').textContent = data.length;
       const list = $('accountList');
       if (!data || data.length === 0) {
         list.innerHTML = '<div style="color:var(--text-dim); padding: 10px; text-align:center; font-size:0.85rem;">No active accounts found.</div>';
@@ -574,6 +613,7 @@
 
     async function loadRejected(searchTerm = '') {
       const data = await convex.query("admin:getRejected", { token: currentToken, searchTerm });
+      $('statRejected').textContent = data.length;
       const list = $('rejectedList');
       if (!data || data.length === 0) {
         list.innerHTML = '<div style="color:var(--text-dim); padding: 10px; text-align:center; font-size:0.85rem;">No rejected applications.</div>';
@@ -584,6 +624,7 @@
 
     async function loadSuspended(searchTerm = '') {
       const data = await convex.query("admin:getSuspended", { token: currentToken, searchTerm });
+      $('statSuspended').textContent = data.length;
       const list = $('suspendedList');
       if (!data || data.length === 0) {
         list.innerHTML = '<div style="color:var(--text-dim); padding: 10px; text-align:center; font-size:0.85rem;">No suspended accounts.</div>';
@@ -668,7 +709,6 @@
         if (!token) { window.location.href = '/login'; return; }
         currentToken = token;
         
-        // OPTIMIZATION: INSTANT RENDER FROM CACHE
         const cachedUser = localStorage.getItem('cached_user');
         if (cachedUser) {
           try {
@@ -677,7 +717,6 @@
           } catch(e) {}
         }
 
-        // BACKGROUND VERIFY WITH CONVEX
         const profile = await convex.query("auth:getCurrentUser", { token });
         if (!profile) { localStorage.removeItem('auth_token'); localStorage.removeItem('cached_user'); window.location.href = '/login'; return; }
         
@@ -706,4 +745,4 @@
     init();
   </script>
 </body>
-  </html>
+</html>
